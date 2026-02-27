@@ -11,6 +11,7 @@ export interface IDeviceInfo {
 
 export interface IToken extends Document {
   user: mongoose.Types.ObjectId;
+  type: "EMAIL_VERIFY" | "REFRESH" | "RESET_PASSWORD";
   tokenHash: string;
   deviceInfo: IDeviceInfo;
   expiresAt: Date;
@@ -23,9 +24,11 @@ export interface IToken extends Document {
 
 export interface ICreateTokenOptions {
   ttlDays?: number;
+  ttlMinutes?: number;
   userAgent?: string | null;
   ip?: string | null;
   familyId?: string | null;
+  type?: "EMAIL_VERIFY" | "REFRESH" | "RESET_PASSWORD";
 }
 
 export interface ITokenModel extends Model<IToken> {
@@ -61,6 +64,14 @@ const tokenSchema = new Schema<IToken, ITokenModel>(
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+      index: true,
+    },
+
+    // token type determines intended use and TTL semantics
+    type: {
+      type: String,
+      enum: ["EMAIL_VERIFY", "REFRESH", "RESET_PASSWORD"],
       required: true,
       index: true,
     },
@@ -119,22 +130,32 @@ tokenSchema.statics.createToken = async function (
   userId: mongoose.Types.ObjectId,
   {
     ttlDays = 30,
+    ttlMinutes,
     userAgent = null,
     ip = null,
     familyId = null,
+    type = "REFRESH",
   }: ICreateTokenOptions = {},
 ): Promise<{ tokenDoc: IToken; rawToken: string }> {
   const rawToken = crypto.randomBytes(64).toString("hex");
   const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
 
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + ttlDays);
+  if (typeof ttlMinutes === "number") {
+    expiresAt.setMinutes(expiresAt.getMinutes() + ttlMinutes);
+  } else {
+    expiresAt.setDate(expiresAt.getDate() + ttlDays);
+  }
 
   const tokenDoc: IToken = await this.create({
     user: userId,
+    type,
     tokenHash,
     expiresAt,
-    familyId: familyId ?? crypto.randomBytes(16).toString("hex"),
+    familyId:
+      type === "REFRESH"
+        ? (familyId ?? crypto.randomBytes(16).toString("hex"))
+        : null,
     deviceInfo: {
       userAgent,
       ip,
@@ -147,9 +168,12 @@ tokenSchema.statics.createToken = async function (
 
 tokenSchema.statics.verifyToken = async function (
   rawToken: string,
+  type?: "EMAIL_VERIFY" | "REFRESH" | "RESET_PASSWORD",
 ): Promise<IToken> {
   const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
-  const tokenDoc = await this.findOne({ tokenHash }).populate("user");
+  const query: any = { tokenHash };
+  if (type) query.type = type;
+  const tokenDoc = await this.findOne(query).populate("user");
 
   if (!tokenDoc) {
     throw new Error("Invalid refresh token");
@@ -173,12 +197,15 @@ tokenSchema.statics.verifyToken = async function (
 
 tokenSchema.statics.revokeToken = async function (
   rawToken: string,
+  type?: "EMAIL_VERIFY" | "REFRESH" | "RESET_PASSWORD",
 ): Promise<void> {
   const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
-  await this.findOneAndUpdate(
-    { tokenHash },
-    { isRevoked: true, revokedAt: new Date() },
-  );
+  const query: any = { tokenHash };
+  if (type) query.type = type;
+  await this.findOneAndUpdate(query, {
+    isRevoked: true,
+    revokedAt: new Date(),
+  });
 };
 
 tokenSchema.statics.revokeAllForUser = async function (
