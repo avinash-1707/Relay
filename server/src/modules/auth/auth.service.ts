@@ -60,10 +60,10 @@ export const signup = async (
 
   // Send verification email (best-effort, don't fail signup if email fails)
   try {
-    const verifyUrl = `${env.APP_URL}/api/auth/verify-email?token=${rawToken}`;
+    const verifyUrl = `${env.SERVER_URL}/api/auth/verify-email?token=${rawToken}`;
     await transporter.sendMail({
       to: user.email,
-      from: env.SMTP_USER || `no-reply@${new URL(env.APP_URL).hostname}`,
+      from: env.SMTP_USER || `no-reply@${new URL(env.SERVER_URL).hostname}`,
       subject: "Verify your email",
       text: `Click to verify: ${verifyUrl}`,
       html: `<p>Click to verify your email: <a href="${verifyUrl}">Verify Email</a></p>`,
@@ -77,7 +77,7 @@ export const signup = async (
 };
 
 export const verifyEmail = async (rawToken: string) => {
-  const tokenDoc = await Token.verifyToken(rawToken);
+  const tokenDoc = await Token.verifyToken(rawToken, "EMAIL_VERIFY");
   // mark user verified
   const user: any = tokenDoc.user;
   user.isEmailVerified = true;
@@ -123,9 +123,7 @@ export const logout = async (req: Request, res: Response) => {
   const raw = req.cookies?.[cookieName];
   if (raw) {
     try {
-      // delete token so refresh cannot be used again
-      const tokenDoc = await Token.verifyToken(raw);
-      await Token.deleteOne({ _id: tokenDoc._id });
+      await Token.revokeToken(raw, "REFRESH");
     } catch (err) {
       // ignore
     }
@@ -140,7 +138,7 @@ export const refresh = async (req: Request, res: Response) => {
   if (!raw) throw new Error("No refresh token provided");
 
   // Verify and rotate
-  const tokenDoc = await Token.verifyToken(raw);
+  const tokenDoc = await Token.verifyToken(raw, "REFRESH");
   // delete old token
   await Token.deleteOne({ _id: tokenDoc._id });
 

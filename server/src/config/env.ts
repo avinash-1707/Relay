@@ -14,6 +14,7 @@ const env = {
   REFRESH_TOKEN_TTL_DAYS: Number(process.env.REFRESH_TOKEN_TTL_DAYS || 7),
   GOOGLE_CLIENT_ID: get("GOOGLE_CLIENT_ID", false) || "",
   GOOGLE_CLIENT_SECRET: get("GOOGLE_CLIENT_SECRET", false) || "",
+  SERVER_URL: get("SERVER_URL", false) || "http://localhost:5000",
   APP_URL: get("APP_URL", false) || "http://localhost:3000",
   SMTP_HOST: get("SMTP_HOST", false) || "",
   SMTP_PORT: Number(process.env.SMTP_PORT || 587),

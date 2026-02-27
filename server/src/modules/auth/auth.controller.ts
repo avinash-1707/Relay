@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import * as service from "./auth.service";
-import Token from "./token.model";
-import { signAccessToken } from "../../utils/jwt";
-import env from "../../config/env";
+import * as service from "./auth.service.js";
+import Token from "./token.model.js";
+import { signAccessToken } from "../../utils/jwt.js";
+import env from "../../config/env.js";
 
 const cookieName = "refreshToken";
 
@@ -107,8 +107,10 @@ export const googleCallback = async (
 
     setRefreshCookie(res, rawToken);
 
-    // Redirect to app; client can call /me to obtain profile using cookie
-    res.redirect(env.APP_URL);
+    // Redirect with access token in URL fragment so the SPA can read it client-side.
+    const redirectUrl = new URL(env.APP_URL);
+    redirectUrl.hash = new URLSearchParams({ accessToken }).toString();
+    res.redirect(redirectUrl.toString());
   } catch (err) {
     next(err);
   }

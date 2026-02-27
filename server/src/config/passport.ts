@@ -9,9 +9,9 @@ import User from "../modules/user/user.model.js";
 
 const GOOGLE_CLIENT_ID: string = env.GOOGLE_CLIENT_ID as string;
 const GOOGLE_CLIENT_SECRET: string = env.GOOGLE_CLIENT_SECRET as string;
-const APP_URL: string = env.APP_URL as string;
+const SERVER_URL: string = env.SERVER_URL as string;
 
-if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !APP_URL) {
+if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !SERVER_URL) {
   throw new Error("Google OAuth environment variables are missing");
 }
 
@@ -20,8 +20,7 @@ passport.use(
     {
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: `${APP_URL}/api/auth/google/callback`,
-      scope: ["profile", "email"],
+      callbackURL: `${SERVER_URL}/api/auth/google/callback`,
     },
     async (
       _accessToken: string,

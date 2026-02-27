@@ -37,9 +37,15 @@ export interface ITokenModel extends Model<IToken> {
     options?: ICreateTokenOptions,
   ): Promise<{ tokenDoc: IToken; rawToken: string }>;
 
-  verifyToken(rawToken: string): Promise<IToken>;
+  verifyToken(
+    rawToken: string,
+    type?: "EMAIL_VERIFY" | "REFRESH" | "RESET_PASSWORD",
+  ): Promise<IToken>;
 
-  revokeToken(rawToken: string): Promise<void>;
+  revokeToken(
+    rawToken: string,
+    type?: "EMAIL_VERIFY" | "REFRESH" | "RESET_PASSWORD",
+  ): Promise<void>;
 
   revokeAllForUser(userId: mongoose.Types.ObjectId): Promise<void>;
 
@@ -176,7 +182,7 @@ tokenSchema.statics.verifyToken = async function (
   const tokenDoc = await this.findOne(query).populate("user");
 
   if (!tokenDoc) {
-    throw new Error("Invalid refresh token");
+    throw new Error("Invalid token");
   }
 
   if (tokenDoc.isRevoked) {
@@ -189,7 +195,7 @@ tokenSchema.statics.verifyToken = async function (
   }
 
   if (tokenDoc.expiresAt < new Date()) {
-    throw new Error("Refresh token has expired");
+    throw new Error("Token has expired");
   }
 
   return tokenDoc;
