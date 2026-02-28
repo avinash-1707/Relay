@@ -13,7 +13,7 @@ app.use(cookieParser());
 // initialize passport (no sessions)
 app.use(passport.initialize());
 
-app.use("/api/auth", authRoutes);
+app.use("/api/v1/auth", authRoutes);
 
 app.get("/", (req, res) => {
   res.send("Running with TSX 🚀");
