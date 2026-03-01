@@ -32,7 +32,7 @@ router.get("/google", (req, res, next) => {
     secure,
     sameSite: "lax",
     maxAge: 10 * 60 * 1000,
-    path: "/api/auth/google/callback",
+    path: "/api/v1/auth/google/callback",
   });
 
   passport.authenticate("google", {
@@ -47,9 +47,13 @@ router.get(
   (req, res, next) => {
     const stateFromCookie = req.cookies?.[oauthStateCookie];
     const stateFromQuery = String(req.query.state || "");
-    res.clearCookie(oauthStateCookie, { path: "/api/auth/google/callback" });
+    res.clearCookie(oauthStateCookie, { path: "/api/v1/auth/google/callback" });
 
-    if (!stateFromCookie || !stateFromQuery || stateFromCookie !== stateFromQuery) {
+    if (
+      !stateFromCookie ||
+      !stateFromQuery ||
+      stateFromCookie !== stateFromQuery
+    ) {
       return res.redirect(`${env.APP_URL}/login?error=oauth_state_mismatch`);
     }
 
