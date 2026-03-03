@@ -36,7 +36,7 @@ export default function HowItWorks() {
   return (
     <section id="how-it-works" className="py-28 relative overflow-hidden">
       {/* Decorative glow */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#0088FF]/6 blur-[120px] pointer-events-none" />
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-125 h-125 rounded-full bg-[#0088FF]/6 blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-20" ref={ref}>
@@ -48,7 +48,7 @@ export default function HowItWorks() {
             style={{ fontFamily: "'Syne', sans-serif" }}
           >
             How{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5CC] to-[#0088FF]">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-[#00E5CC] to-[#0088FF]">
               Relay
             </span>{" "}
             works
@@ -66,7 +66,7 @@ export default function HowItWorks() {
 
         <div className="relative">
           {/* Connecting line */}
-          <div className="hidden lg:block absolute top-12 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <div className="hidden lg:block absolute top-12 left-[10%] right-[10%] h-px bg-linear-to-r from-transparent via-white/10 to-transparent" />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((step, i) => (

@@ -10,6 +10,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.use((req, res, next) => {
+  const startedAt = process.hrtime.bigint();
+
+  res.on("finish", () => {
+    const endedAt = process.hrtime.bigint();
+    const durationMs = Number(endedAt - startedAt) / 1_000_000;
+    const contentLength = res.getHeader("content-length") ?? "-";
+    const ip = req.ip || req.socket.remoteAddress || "-";
+    const userAgent = req.get("user-agent") || "-";
+
+    console.log(
+      `[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ${res.statusCode} ${durationMs.toFixed(2)}ms ${contentLength}b ip=${ip} ua="${userAgent}"`,
+    );
+  });
+
+  next();
+});
+
 // initialize passport (no sessions)
 app.use(passport.initialize());
 

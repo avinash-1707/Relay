@@ -6,13 +6,13 @@ export default function Footer() {
   };
 
   return (
-    <footer className="border-t border-white/[0.06] px-6 py-16">
+    <footer className="border-t border-white/6 px-6 py-16">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-linear-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <path d="M2 7 L6 3 L12 7 L6 11 Z" fill="white" />
                 </svg>
@@ -21,7 +21,7 @@ export default function Footer() {
                 Relay
               </span>
             </div>
-            <p className="text-sm text-white/35 leading-relaxed max-w-[160px]">
+            <p className="text-sm text-white/35 leading-relaxed max-w-40">
               Real-time messaging infrastructure for global teams.
             </p>
           </div>
@@ -49,7 +49,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-white/[0.05]">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-white/5">
           <p className="text-xs text-white/25">
             © 2025 Relay Technologies, Inc. All rights reserved.
           </p>

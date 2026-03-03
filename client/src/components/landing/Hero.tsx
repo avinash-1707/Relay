@@ -11,8 +11,8 @@ export default function Hero() {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full bg-cyan-500/5 blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[300px] rounded-full bg-blue-600/8 blur-[80px]" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-175 h-125 rounded-full bg-cyan-500/5 blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-100 h-75 rounded-full bg-blue-600/8 blur-[80px]" />
         {/* Grid lines */}
         <svg
           className="absolute inset-0 w-full h-full opacity-[0.04]"
@@ -55,7 +55,7 @@ export default function Hero() {
           className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.05] mb-6 max-w-4xl mx-auto"
         >
           Messaging at{" "}
-          <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
             the speed
           </span>
           <br />
@@ -78,7 +78,7 @@ export default function Hero() {
         >
           <a
             href="#"
-            className="px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity duration-200 shadow-lg shadow-cyan-500/20"
+            className="px-6 py-3 rounded-lg bg-linear-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity duration-200 shadow-lg shadow-cyan-500/20"
           >
             Start building free
           </a>

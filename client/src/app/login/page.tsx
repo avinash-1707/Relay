@@ -1,8 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence, cubicBezier } from "motion/react";
+import {
+  api,
+  AuthApiError,
+  getGoogleAuthUrl,
+  login,
+  signup,
+} from "@/lib/api";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -21,6 +29,28 @@ interface RegisterFormData {
   confirmPassword: string;
   acceptTerms: boolean;
 }
+
+const ACCESS_TOKEN_KEY = "relay_access_token";
+
+const persistAccessToken = (token: string, rememberMe: boolean) => {
+  if (typeof window === "undefined") return;
+  if (rememberMe) {
+    localStorage.setItem(ACCESS_TOKEN_KEY, token);
+    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+    return;
+  }
+  sessionStorage.setItem(ACCESS_TOKEN_KEY, token);
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+};
+
+const getErrorMessage = (
+  error: unknown,
+  fallback: string,
+): string => {
+  if (error instanceof AuthApiError) return error.message;
+  if (error instanceof Error && error.message) return error.message;
+  return fallback;
+};
 
 // ── Animation helpers ─────────────────────────────────────────────────────────
 
@@ -221,13 +251,15 @@ function Checkbox({ checked, onChange, label, error }: CheckboxProps) {
 // ── Login Form ────────────────────────────────────────────────────────────────
 
 interface LoginFormProps {
-  onSuccess: () => void;
+  onSuccess: (accessToken: string, rememberMe: boolean) => void;
+  onError: (message: string) => void;
   onGoogleLoading: (v: boolean) => void;
   googleLoading: boolean;
 }
 
 function LoginForm({
   onSuccess,
+  onError,
   onGoogleLoading,
   googleLoading,
 }: LoginFormProps) {
@@ -244,16 +276,23 @@ function LoginForm({
 
   const rememberMe = watch("rememberMe");
 
-  const onSubmit = async (_data: LoginFormData) => {
-    await new Promise((r) => setTimeout(r, 1500));
-    onSuccess();
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      onError("");
+      const result = await login({
+        email: data.email,
+        password: data.password,
+      });
+      onSuccess(result.accessToken, data.rememberMe);
+    } catch (error) {
+      onError(getErrorMessage(error, "Unable to sign in. Please try again."));
+    }
   };
 
-  const handleGoogle = async () => {
+  const handleGoogle = () => {
+    onError("");
     onGoogleLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    onGoogleLoading(false);
-    onSuccess();
+    window.location.href = getGoogleAuthUrl();
   };
 
   return (
@@ -403,12 +442,14 @@ function LoginForm({
 
 interface RegisterFormProps {
   onSuccess: () => void;
+  onError: (message: string) => void;
   onGoogleLoading: (v: boolean) => void;
   googleLoading: boolean;
 }
 
 function RegisterForm({
   onSuccess,
+  onError,
   onGoogleLoading,
   googleLoading,
 }: RegisterFormProps) {
@@ -427,16 +468,26 @@ function RegisterForm({
   const acceptTerms = watch("acceptTerms");
   const password = watch("password");
 
-  const onSubmit = async (_data: RegisterFormData) => {
-    await new Promise((r) => setTimeout(r, 1500));
-    onSuccess();
+  const onSubmit = async (data: RegisterFormData) => {
+    try {
+      onError("");
+      await signup({
+        email: data.email,
+        password: data.password,
+        displayName: data.name,
+      });
+      onSuccess();
+    } catch (error) {
+      onError(
+        getErrorMessage(error, "Unable to create account. Please try again."),
+      );
+    }
   };
 
-  const handleGoogle = async () => {
+  const handleGoogle = () => {
+    onError("");
     onGoogleLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    onGoogleLoading(false);
-    onSuccess();
+    window.location.href = getGoogleAuthUrl();
   };
 
   return (
@@ -680,6 +731,30 @@ function Divider() {
   );
 }
 
+function FormErrorBanner({ message }: { message: string }) {
+  if (!message) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      transition={{ duration: 0.2 }}
+      style={{
+        marginBottom: 16,
+        borderRadius: 10,
+        border: "1px solid rgba(248,113,113,0.35)",
+        background: "rgba(248,113,113,0.08)",
+        color: "#fda4af",
+        fontSize: 13,
+        padding: "10px 12px",
+        lineHeight: 1.4,
+      }}
+    >
+      {message}
+    </motion.div>
+  );
+}
+
 function EyeToggle({
   open,
   onToggle,
@@ -852,13 +927,52 @@ function SuccessScreen({ mode }: { mode: AuthMode }) {
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function RelayAuth() {
+  const router = useRouter();
   const [mode, setMode] = useState<AuthMode>("login");
   const [success, setSuccess] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
 
   const switchMode = (newMode: AuthMode) => {
     setMode(newMode);
     setSuccess(false);
+    setAuthError("");
+    setGoogleLoading(false);
+  };
+
+  useEffect(() => {
+    const hash = window.location.hash.startsWith("#")
+      ? window.location.hash.slice(1)
+      : "";
+    if (!hash) return;
+
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get("accessToken");
+    if (!accessToken) return;
+
+    persistAccessToken(accessToken, true);
+    api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${window.location.search}`,
+    );
+    setSuccess(true);
+    setTimeout(() => router.push("/"), 900);
+  }, [router]);
+
+  const handleLoginSuccess = (accessToken: string, rememberMe: boolean) => {
+    persistAccessToken(accessToken, rememberMe);
+    api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+    setAuthError("");
+    setSuccess(true);
+    setTimeout(() => router.push("/"), 900);
+  };
+
+  const handleRegisterSuccess = () => {
+    setAuthError("");
+    setSuccess(true);
+    setTimeout(() => switchMode("login"), 1000);
   };
 
   return (
@@ -1091,15 +1205,21 @@ export default function RelayAuth() {
                   }}
                 />
 
+                <AnimatePresence>
+                  {authError && <FormErrorBanner message={authError} />}
+                </AnimatePresence>
+
                 {mode === "login" ? (
                   <LoginForm
-                    onSuccess={() => setSuccess(true)}
+                    onSuccess={handleLoginSuccess}
+                    onError={setAuthError}
                     onGoogleLoading={setGoogleLoading}
                     googleLoading={googleLoading}
                   />
                 ) : (
                   <RegisterForm
-                    onSuccess={() => setSuccess(true)}
+                    onSuccess={handleRegisterSuccess}
+                    onError={setAuthError}
                     onGoogleLoading={setGoogleLoading}
                     googleLoading={googleLoading}
                   />

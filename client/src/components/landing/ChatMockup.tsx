@@ -51,15 +51,15 @@ export default function ChatMockup() {
   }, []);
 
   return (
-    <div className="relative w-[360px]">
+    <div className="relative w-90">
       {/* Glow */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#00E5CC]/10 to-[#0088FF]/10 blur-3xl rounded-3xl" />
+      <div className="absolute inset-0 bg-linear-to-b from-[#00E5CC]/10 to-[#0088FF]/10 blur-3xl rounded-3xl" />
 
       <div className="relative rounded-3xl border border-white/10 bg-[#0D1520]/80 backdrop-blur-xl overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-white/8 flex items-center gap-3 bg-white/[0.02]">
+        <div className="px-5 py-4 border-b border-white/8 flex items-center gap-3 bg-white/2">
           <div
-            className="w-9 h-9 rounded-full bg-gradient-to-br from-[#00E5CC] to-[#0088FF] flex items-center justify-center font-bold text-sm text-[#080C14]"
+            className="w-9 h-9 rounded-full bg-linear-to-br from-[#00E5CC] to-[#0088FF] flex items-center justify-center font-bold text-sm text-[#080C14]"
             style={{ fontFamily: "'Syne', sans-serif" }}
           >
             A
@@ -96,7 +96,7 @@ export default function ChatMockup() {
         </div>
 
         {/* Messages */}
-        <div className="p-4 space-y-3 min-h-[320px]">
+        <div className="p-4 space-y-3 min-h-80">
           <AnimatePresence>
             {messages.slice(0, visibleCount).map((msg) => (
               <motion.div
@@ -109,7 +109,7 @@ export default function ChatMockup() {
                 <div
                   className={`max-w-[75%] ${
                     msg.from === "me"
-                      ? "bg-gradient-to-br from-[#00E5CC] to-[#0088FF] text-[#080C14]"
+                      ? "bg-linear-to-br from-[#00E5CC] to-[#0088FF] text-[#080C14]"
                       : "bg-white/8 text-white"
                   } rounded-2xl ${msg.from === "me" ? "rounded-br-sm" : "rounded-bl-sm"} px-4 py-2.5`}
                 >
@@ -211,7 +211,7 @@ export default function ChatMockup() {
           >
             Message Alex...
           </div>
-          <button className="w-9 h-9 rounded-full bg-gradient-to-br from-[#00E5CC] to-[#0088FF] flex items-center justify-center flex-shrink-0">
+          <button className="w-9 h-9 rounded-full bg-linear-to-br from-[#00E5CC] to-[#0088FF] flex items-center justify-center shrink-0">
             <svg
               width="16"
               height="16"

@@ -59,7 +59,7 @@ function ChatBubble({
       className={`flex items-end gap-2.5 ${isMe ? "flex-row-reverse" : ""}`}
     >
       {!isMe && (
-        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
+        <div className="w-7 h-7 rounded-full bg-linear-to-br from-violet-500 to-purple-700 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
           {msg.name?.[0]}
         </div>
       )}
@@ -69,7 +69,7 @@ function ChatBubble({
         <div
           className={`px-3.5 py-2 rounded-2xl text-[13px] leading-relaxed ${
             isMe
-              ? "bg-gradient-to-br from-cyan-500 to-blue-600 text-white rounded-br-sm"
+              ? "bg-linear-to-br from-cyan-500 to-blue-600 text-white rounded-br-sm"
               : "bg-white/8 text-white/85 rounded-bl-sm"
           }`}
         >
@@ -103,7 +103,7 @@ function MockChat() {
       {/* Window chrome */}
       <div className="rounded-2xl border border-white/10 bg-[#0D1117] overflow-hidden shadow-2xl shadow-black/50">
         {/* Title bar */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/2">
           <div className="flex gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
             <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
@@ -118,7 +118,7 @@ function MockChat() {
         </div>
 
         {/* Messages area */}
-        <div className="p-5 flex flex-col gap-4 min-h-[280px]">
+        <div className="p-5 flex flex-col gap-4 min-h-70">
           {messages.map((msg, i) => (
             <ChatBubble key={msg.id} msg={msg} visible={i < visibleCount} />
           ))}
@@ -131,7 +131,7 @@ function MockChat() {
               transition={{ delay: 0.5 }}
               className="flex items-center gap-2"
             >
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-purple-700 flex-shrink-0" />
+              <div className="w-7 h-7 rounded-full bg-linear-to-br from-violet-500 to-purple-700 shrink-0" />
               <div className="flex items-center gap-1 px-3.5 py-2.5 rounded-2xl rounded-bl-sm bg-white/8">
                 {[0, 0.15, 0.3].map((d) => (
                   <motion.span
@@ -148,7 +148,7 @@ function MockChat() {
 
         {/* Input bar */}
         <div className="px-4 pb-4">
-          <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+          <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/4 border border-white/6">
             <span className="text-sm text-white/20 flex-1">
               Reply to team...
             </span>
@@ -237,7 +237,7 @@ export default function RealTime() {
                   transition={{ duration: 0.45, delay: 0.18 + i * 0.07 }}
                   className="flex gap-4"
                 >
-                  <div className="w-5 h-5 rounded-full bg-cyan-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-cyan-500/15 flex items-center justify-center shrink-0 mt-0.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   </div>
                   <div>

@@ -7,11 +7,11 @@ export default function FinalCTA() {
   return (
     <section className="py-28 px-6">
       <div className="max-w-7xl mx-auto" ref={ref}>
-        <div className="relative rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.04] to-transparent overflow-hidden px-8 py-20 text-center">
+        <div className="relative rounded-2xl border border-white/8 bg-linear-to-b from-white/4 to-transparent overflow-hidden px-8 py-20 text-center">
           {/* Glow */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-cyan-500/8 blur-[80px] pointer-events-none" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-150 h-50 bg-cyan-500/8 blur-[80px] pointer-events-none" />
           {/* Top line */}
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
+          <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-cyan-500/40 to-transparent" />
 
           <motion.p
             initial={{ opacity: 0 }}
@@ -53,7 +53,7 @@ export default function FinalCTA() {
           >
             <a
               href="#"
-              className="px-8 py-3.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity duration-200 shadow-lg shadow-cyan-500/25"
+              className="px-8 py-3.5 rounded-lg bg-linear-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity duration-200 shadow-lg shadow-cyan-500/25"
             >
               Start for free
             </a>

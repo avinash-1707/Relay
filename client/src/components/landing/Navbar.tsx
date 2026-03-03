@@ -24,7 +24,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
         {/* Logo */}
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-linear-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M2 7 L6 3 L12 7 L6 11 Z" fill="white" />
             </svg>
@@ -57,7 +57,7 @@ export default function Navbar() {
           </a>
           <a
             href="#"
-            className="text-sm font-medium px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:opacity-90 transition-opacity duration-200"
+            className="text-sm font-medium px-4 py-2 rounded-lg bg-linear-to-r from-cyan-500 to-blue-600 text-white hover:opacity-90 transition-opacity duration-200"
           >
             Get started
           </a>

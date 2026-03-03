@@ -5,7 +5,7 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-const AUTH_BASE = "/api/v1/auth";
+const AUTH_BASE = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth`;
 
 export interface SignupPayload {
   email: string;
@@ -39,11 +39,7 @@ export class AuthApiError extends Error {
   status?: number;
   code: "VALIDATION_ERROR" | "NETWORK_ERROR" | "SERVER_ERROR" | "UNKNOWN_ERROR";
 
-  constructor(
-    message: string,
-    code: AuthApiError["code"],
-    status?: number,
-  ) {
+  constructor(message: string, code: AuthApiError["code"], status?: number) {
     super(message);
     this.name = "AuthApiError";
     this.code = code;
@@ -126,7 +122,11 @@ const getAuth = async <T>(
 export const signup = async (
   payload: SignupPayload,
 ): Promise<SignupResponse> => {
-  if (!payload.email?.trim() || !payload.password || !payload.displayName?.trim()) {
+  if (
+    !payload.email?.trim() ||
+    !payload.password ||
+    !payload.displayName?.trim()
+  ) {
     throw new AuthApiError(
       "Email, password, and display name are required.",
       "VALIDATION_ERROR",
@@ -141,7 +141,10 @@ export const signup = async (
 
 export const login = async (payload: LoginPayload): Promise<LoginResponse> => {
   if (!payload.email?.trim() || !payload.password) {
-    throw new AuthApiError("Email and password are required.", "VALIDATION_ERROR");
+    throw new AuthApiError(
+      "Email and password are required.",
+      "VALIDATION_ERROR",
+    );
   }
   return postAuth<LoginResponse>(
     "/login",
@@ -154,7 +157,10 @@ export const verifyEmail = async (
   token: string,
 ): Promise<VerifyEmailResponse> => {
   if (!token?.trim()) {
-    throw new AuthApiError("Verification token is required.", "VALIDATION_ERROR");
+    throw new AuthApiError(
+      "Verification token is required.",
+      "VALIDATION_ERROR",
+    );
   }
   return getAuth<VerifyEmailResponse>(
     "/verify-email",

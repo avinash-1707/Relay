@@ -137,10 +137,10 @@ export default function Features() {
               variants={{ cardVariants }}
               initial="hidden"
               animate={isInView ? "visible" : "hidden"}
-              className="group relative flex flex-col p-6 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10 transition-all duration-300 cursor-default"
+              className="group relative flex flex-col p-6 rounded-xl bg-white/3 border border-white/6 hover:bg-white/6 hover:border-white/10 transition-all duration-300 cursor-default"
             >
               {/* Top accent */}
-              <div className="absolute top-0 inset-x-0 h-px rounded-t-xl bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute top-0 inset-x-0 h-px rounded-t-xl bg-linear-to-r from-transparent via-cyan-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
               <div className="w-10 h-10 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-5">
                 {f.icon}
