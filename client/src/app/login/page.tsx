@@ -10,6 +10,7 @@ import {
   getGoogleAuthUrl,
   login,
   signup,
+  getSessionStatus,
 } from "@/lib/api";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -43,10 +44,7 @@ const persistAccessToken = (token: string, rememberMe: boolean) => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
 };
 
-const getErrorMessage = (
-  error: unknown,
-  fallback: string,
-): string => {
+const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof AuthApiError) return error.message;
   if (error instanceof Error && error.message) return error.message;
   return fallback;
@@ -940,6 +938,21 @@ export default function RelayAuth() {
     setGoogleLoading(false);
   };
 
+  // Auth guard: redirect to homepage if already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const session = await getSessionStatus();
+        if (session.active) {
+          router.push("/homepage");
+        }
+      } catch (err) {
+        // Session check failed, user is not authenticated, continue
+      }
+    };
+    checkSession();
+  }, [router]);
+
   useEffect(() => {
     const hash = window.location.hash.startsWith("#")
       ? window.location.hash.slice(1)
@@ -958,7 +971,7 @@ export default function RelayAuth() {
       `${window.location.pathname}${window.location.search}`,
     );
     setSuccess(true);
-    setTimeout(() => router.push("/"), 900);
+    setTimeout(() => router.push("/homepage"), 900);
   }, [router]);
 
   const handleLoginSuccess = (accessToken: string, rememberMe: boolean) => {
@@ -966,7 +979,7 @@ export default function RelayAuth() {
     api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
     setAuthError("");
     setSuccess(true);
-    setTimeout(() => router.push("/"), 900);
+    setTimeout(() => router.push("/homepage"), 900);
   };
 
   const handleRegisterSuccess = () => {

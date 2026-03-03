@@ -30,7 +30,7 @@ const setRefreshCookie = (res: Response, token: string) => {
     sameSite: "lax",
     maxAge: env.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
     domain: env.COOKIE_DOMAIN || undefined,
-    path: "/api/auth/refresh",
+    path: "/api/v1/auth",
   });
 };
 
@@ -60,7 +60,7 @@ export const signup = async (
 
   // Send verification email (best-effort, don't fail signup if email fails)
   try {
-    const verifyUrl = `${env.SERVER_URL}/api/auth/verify-email?token=${rawToken}`;
+    const verifyUrl = `${env.SERVER_URL}/api/v1/auth/verify-email?token=${rawToken}`;
     await transporter.sendMail({
       to: user.email,
       from: env.SMTP_USER || `no-reply@${new URL(env.SERVER_URL).hostname}`,
@@ -129,7 +129,7 @@ export const logout = async (req: Request, res: Response) => {
     }
   }
 
-  res.clearCookie(cookieName, { path: "/api/auth/refresh" });
+  res.clearCookie(cookieName, { path: "/api/v1/auth" });
   return;
 };
 
@@ -159,10 +159,35 @@ export const refresh = async (req: Request, res: Response) => {
   return { accessToken };
 };
 
+export const getSessionStatus = async (req: Request) => {
+  const raw = req.cookies?.[cookieName];
+  if (!raw) {
+    return { active: false as const };
+  }
+
+  try {
+    const tokenDoc = await Token.verifyToken(raw, "REFRESH");
+    const user = tokenDoc.user as any;
+
+    if (!user) {
+      return { active: false as const };
+    }
+
+    return {
+      active: true as const,
+      userId: String(user._id),
+      expiresAt: tokenDoc.expiresAt,
+    };
+  } catch (err) {
+    return { active: false as const };
+  }
+};
+
 export default {
   signup,
   login,
   logout,
   verifyEmail,
   refresh,
+  getSessionStatus,
 };

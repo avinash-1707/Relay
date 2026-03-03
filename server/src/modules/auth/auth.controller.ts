@@ -14,7 +14,7 @@ const setRefreshCookie = (res: Response, token: string) => {
     sameSite: "lax",
     maxAge: env.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
     domain: env.COOKIE_DOMAIN || undefined,
-    path: "/api/auth/refresh",
+    path: "/api/v1/auth",
   });
 };
 
@@ -86,6 +86,19 @@ export const logout = async (
   }
 };
 
+export const session = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const data = await service.getSessionStatus(req);
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+};
+
 // Called after Passport GoogleStrategy
 export const googleCallback = async (
   req: Request,
@@ -108,7 +121,7 @@ export const googleCallback = async (
     setRefreshCookie(res, rawToken);
 
     // Redirect with access token in URL fragment so the SPA can read it client-side.
-    const redirectUrl = new URL(env.APP_URL);
+    const redirectUrl = new URL(`${env.APP_URL}/homepage`);
     redirectUrl.hash = new URLSearchParams({ accessToken }).toString();
     res.redirect(redirectUrl.toString());
   } catch (err) {
@@ -122,5 +135,6 @@ export default {
   login,
   refresh,
   logout,
+  session,
   googleCallback,
 };

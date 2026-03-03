@@ -1,11 +1,21 @@
 import express from "express";
+import cors from "cors";
 import cookieParser from "cookie-parser";
 import passport from "./config/passport.js";
 import authRoutes from "./modules/auth/auth.routes.js";
+import dbConnect from "./config/db.js";
+import env from "./config/env.js";
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 5000;
+await dbConnect();
 
+app.use(
+  cors({
+    origin: env.APP_URL,
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

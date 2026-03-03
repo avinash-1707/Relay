@@ -30,6 +30,12 @@ export interface VerifyEmailResponse {
   message: string;
 }
 
+export interface SessionStatus {
+  active: boolean;
+  userId?: string;
+  expiresAt?: string;
+}
+
 interface ErrorBody {
   message?: string;
   error?: string;
@@ -186,3 +192,11 @@ export const logout = async (): Promise<void> => {
 };
 
 export const getGoogleAuthUrl = (): string => `${AUTH_BASE}/google`;
+
+export const getSessionStatus = async (): Promise<SessionStatus> => {
+  return getAuth<SessionStatus>(
+    "/session",
+    {},
+    "Failed to check session status.",
+  );
+};

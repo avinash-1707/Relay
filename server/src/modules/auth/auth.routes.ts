@@ -20,6 +20,7 @@ router.get("/verify-email", controller.verifyEmail);
 
 router.post("/refresh", controller.refresh);
 router.post("/logout", controller.logout);
+router.get("/session", controller.session);
 
 const oauthStateCookie = "google_oauth_state";
 
