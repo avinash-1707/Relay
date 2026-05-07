@@ -1,13 +1,24 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import {
+  ReactNode,
+  useEffect,
+  useState,
+  createContext,
+  useContext,
+} from "react";
 import { useRouter } from "next/navigation";
 import { api, getSessionStatus, refreshAccessToken } from "@/lib/api";
 
 const ACCESS_TOKEN_KEY = "relay_access_token";
 
+const AuthReadyContext = createContext(false);
+
+export const useAuthReady = () => useContext(AuthReadyContext);
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -32,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
             } catch {
               router.push("/login");
+              return;
             }
           }
         } else if (!tokenFromStorage) {
@@ -40,15 +52,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             !window.location.pathname.startsWith("/login")
           ) {
             router.push("/login");
+            return;
           }
         }
       } catch (err) {
         // Session check failed, allow page to load but protect routes as needed
       }
+
+      setAuthReady(true);
     };
 
     initAuth();
   }, [router]);
 
-  return <>{children}</>;
+  return (
+    <AuthReadyContext.Provider value={authReady}>
+      {children}
+    </AuthReadyContext.Provider>
+  );
 }

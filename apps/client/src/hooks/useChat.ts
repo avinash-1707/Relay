@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import type { Conversation, Message, AppState, User } from "@/types";
 import { useSocket } from "@/providers/SocketProvider";
+import { useAuthReady } from "@/providers/AuthProvider";
 import { SOCKET_EVENTS } from "@relay/shared";
 import {
   getCurrentUser,
@@ -114,6 +115,7 @@ interface RawStatusEvent {
 
 export function useChat() {
   const { socket } = useSocket();
+  const authReady = useAuthReady();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loadedMessages, setLoadedMessages] = useState<
     Record<string, Message[]>
@@ -135,6 +137,7 @@ export function useChat() {
   }, [state.activeConversationId]);
 
   useEffect(() => {
+    if (!authReady) return;
     async function init() {
       try {
         const [user, convs] = await Promise.all([
@@ -153,7 +156,7 @@ export function useChat() {
       }
     }
     init();
-  }, []);
+  }, [authReady]);
 
   useEffect(() => {
     if (!socket) return;
