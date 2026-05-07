@@ -273,6 +273,13 @@ export const markConversationRead = async (
 
 // ─── Message API ──────────────────────────────────────────────────────────────
 
+export interface ServerAttachment {
+  url: string;
+  fileType: string;
+  fileName: string | null;
+  fileSize: number | null;
+}
+
 export interface ServerMessage {
   _id: string;
   conversation: string;
@@ -284,6 +291,7 @@ export interface ServerMessage {
   isDeleted: boolean;
   isEdited: boolean;
   replyTo: { _id: string; body: string; isDeleted: boolean } | null;
+  attachments: ServerAttachment[];
   createdAt: string;
   updatedAt: string;
 }
@@ -309,10 +317,23 @@ export const getMessages = async (
 export const sendMessageHttp = async (
   conversationId: string,
   body: string,
+  messageType?: string,
+  attachments?: ServerAttachment[],
 ): Promise<ServerMessage> => {
   const { data } = await api.post<ServerMessage>(
     `/api/v1/conversations/${conversationId}/messages`,
-    { body },
+    { body, messageType, attachments },
   );
+  return data;
+};
+
+export const uploadFile = async (
+  file: File,
+): Promise<ServerAttachment> => {
+  const form = new FormData();
+  form.append("file", file);
+  const { data } = await api.post<ServerAttachment>("/api/v1/upload", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return data;
 };

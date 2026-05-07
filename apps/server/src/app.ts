@@ -7,6 +7,7 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import conversationRoutes from "./modules/conversation/conversation.routes.js";
 import messageRoutes from "./modules/message/message.routes.js";
 import userRoutes from "./modules/user/user.routes.js";
+import uploadRoutes from "./modules/upload/upload.routes.js";
 import dbConnect from "./config/db.js";
 import env from "./config/env.js";
 import { initSocket } from "./socket/index.js";
@@ -50,6 +51,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/conversations", conversationRoutes);
 app.use("/api/v1/conversations/:conversationId/messages", messageRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/upload", uploadRoutes);
 
 app.get("/", (req, res) => {
   res.send("Running with TSX 🚀");

@@ -13,7 +13,9 @@ import {
   type ServerUser,
   type ServerConversation,
   type ServerMessage,
+  type ServerAttachment,
 } from "@/lib/api";
+import type { Attachment } from "@/types";
 
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
 
@@ -58,6 +60,8 @@ function mapServerMessage(msg: ServerMessage, serverUserId: string): Message {
     text: msg.isDeleted ? "This message was deleted" : msg.body,
     timestamp: formatTime(msg.createdAt),
     status: msg.deliveryStatus,
+    messageType: msg.messageType,
+    attachments: (msg.attachments ?? []) as Attachment[],
   };
 }
 
@@ -257,11 +261,15 @@ export function useChat() {
     });
   }, []);
 
-  const sendMessage = useCallback(async (text: string) => {
+  const sendMessage = useCallback(async (
+    text: string,
+    messageType?: string,
+    attachments?: ServerAttachment[],
+  ) => {
     const convId = activeConvIdRef.current;
-    if (!convId || !text.trim()) return;
+    if (!convId || (!text.trim() && (!attachments || attachments.length === 0))) return;
     try {
-      const msg = await sendMessageHttp(convId, text.trim());
+      const msg = await sendMessageHttp(convId, text.trim(), messageType, attachments);
       const clientMsg = mapServerMessage(msg, serverUserIdRef.current);
 
       setLoadedMessages((prev) => {

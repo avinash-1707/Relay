@@ -31,18 +31,21 @@ export const send = async (
   next: NextFunction,
 ) => {
   try {
-    const { body, messageType, replyTo } = req.body;
-    if (!body?.trim()) {
-      res.status(400).json({ message: "body is required" });
+    const { body, messageType, replyTo, attachments } = req.body;
+    const hasText = body?.trim();
+    const hasAttachments = Array.isArray(attachments) && attachments.length > 0;
+    if (!hasText && !hasAttachments) {
+      res.status(400).json({ message: "body or attachments required" });
       return;
     }
     const conversationId = param(req.params.conversationId);
     const message = await service.sendMessage(
       (req as any).userId,
       conversationId,
-      body,
+      body ?? "",
       messageType,
       replyTo,
+      attachments,
     );
     io.to(conversationId).emit(SOCKET_EVENTS.MESSAGE_NEW, message);
     res.status(201).json(message);

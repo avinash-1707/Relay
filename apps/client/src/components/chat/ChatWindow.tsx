@@ -3,13 +3,14 @@ import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import type { Conversation } from "../../types";
+import type { ServerAttachment } from "../../lib/api";
 import { useTyping } from "../../hooks/useTyping";
 
 interface Props {
   conversation: Conversation;
   currentUserId: string;
   currentUserDisplayName: string;
-  onSend: (text: string) => void;
+  onSend: (text: string, messageType?: string, attachments?: ServerAttachment[]) => void;
 }
 
 export default function ChatWindow({

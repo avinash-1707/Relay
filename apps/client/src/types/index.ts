@@ -12,6 +12,13 @@ export interface User {
   about?: string;
 }
 
+export interface Attachment {
+  url: string;
+  fileType: string;
+  fileName: string | null;
+  fileSize: number | null;
+}
+
 export interface Message {
   id: string;
   senderId: string;
@@ -20,6 +27,8 @@ export interface Message {
   status: MessageStatus;
   reaction?: string;
   replyTo?: string;
+  messageType?: string;
+  attachments?: Attachment[];
 }
 
 export interface Conversation {

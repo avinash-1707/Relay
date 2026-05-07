@@ -44,6 +44,7 @@ export async function sendMessage(
   body: string,
   messageType: "text" | "image" | "file" | "audio" | "video" | "system" = "text",
   replyTo?: string | null,
+  attachments?: Array<{ url: string; fileType: string; fileName: string | null; fileSize: number | null }>,
 ) {
   const uid = new mongoose.Types.ObjectId(userId);
   const cid = new mongoose.Types.ObjectId(conversationId);
@@ -60,6 +61,7 @@ export async function sendMessage(
     body: body.trim(),
     messageType,
     replyTo: replyTo ? new mongoose.Types.ObjectId(replyTo) : null,
+    attachments: attachments ?? [],
   });
 
   await message.populate("sender", SENDER_SELECT);

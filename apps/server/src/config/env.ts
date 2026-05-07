@@ -21,6 +21,9 @@ const env = {
   SMTP_USER: get("SMTP_USER", false) || "",
   SMTP_PASS: get("SMTP_PASS", false) || "",
   COOKIE_DOMAIN: get("COOKIE_DOMAIN", false) || "",
+  CLOUDINARY_CLOUD_NAME: get("CLOUDINARY_CLOUD_NAME", false) || "",
+  CLOUDINARY_API_KEY: get("CLOUDINARY_API_KEY", false) || "",
+  CLOUDINARY_API_SECRET: get("CLOUDINARY_API_SECRET", false) || "",
 };
 
 export default env;
