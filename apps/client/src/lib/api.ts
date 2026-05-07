@@ -257,10 +257,10 @@ export const getConversations = async (): Promise<ServerConversation[]> => {
 };
 
 export const findOrCreateConversation = async (
-  targetUserId: string,
+  targetEmail: string,
 ): Promise<ServerConversation> => {
   const { data } = await api.post<ServerConversation>("/api/v1/conversations", {
-    targetUserId,
+    targetEmail,
   });
   return data;
 };

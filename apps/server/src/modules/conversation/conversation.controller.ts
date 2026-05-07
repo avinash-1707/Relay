@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as service from "./conversation.service.js";
+import User from "../user/user.model.js";
 
 const param = (v: string | string[]): string =>
   Array.isArray(v) ? v[0] : v;
@@ -25,14 +26,23 @@ export const findOrCreate = async (
   next: NextFunction,
 ) => {
   try {
-    const { targetUserId } = req.body;
-    if (!targetUserId) {
-      res.status(400).json({ message: "targetUserId is required" });
+    const { targetEmail } = req.body;
+    if (!targetEmail) {
+      res.status(400).json({ message: "targetEmail is required" });
+      return;
+    }
+    const target = await User.findOne({ email: targetEmail.toLowerCase().trim() });
+    if (!target) {
+      res.status(404).json({ message: "No user found with that email" });
+      return;
+    }
+    if (String(target._id) === String((req as any).userId)) {
+      res.status(400).json({ message: "Cannot start a conversation with yourself" });
       return;
     }
     const result = await service.findOrCreateDirect(
       (req as any).userId,
-      targetUserId,
+      String(target._id),
     );
     res.status(result.isNew ? 201 : 200).json(result.conversation);
   } catch (err) {
