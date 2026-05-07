@@ -12,6 +12,7 @@ interface Props {
   onSelect: (id: string) => void;
   onSearch: (q: string) => void;
   onTabChange: (t: AppState["sidebarTab"]) => void;
+  onLogout: () => void;
 }
 
 export default function Sidebar({
@@ -23,6 +24,7 @@ export default function Sidebar({
   onSelect,
   onSearch,
   onTabChange,
+  onLogout,
 }: Props) {
   return (
     <div
@@ -38,7 +40,7 @@ export default function Sidebar({
         flexShrink: 0,
       }}
     >
-      <SidebarHeader tab={tab} onTabChange={onTabChange} currentUser={currentUser} />
+      <SidebarHeader tab={tab} onTabChange={onTabChange} currentUser={currentUser} onLogout={onLogout} />
       <SearchBar value={searchQuery} onChange={onSearch} />
       <ConversationList
         conversations={conversations}

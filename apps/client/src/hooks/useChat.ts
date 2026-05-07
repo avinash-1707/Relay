@@ -9,6 +9,7 @@ import {
   getMessages,
   sendMessageHttp,
   markConversationRead,
+  findOrCreateConversation,
   type ServerUser,
   type ServerConversation,
   type ServerMessage,
@@ -17,6 +18,7 @@ import {
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
 
 function getInitials(name: string): string {
+  if (!name) return "?";
   return name
     .split(" ")
     .filter(Boolean)
@@ -37,6 +39,8 @@ function mapServerUser(u: ServerUser): User {
           minute: "2-digit",
         })
       : undefined,
+    email: u.email,
+    about: u.about,
   };
 }
 
@@ -284,6 +288,17 @@ export function useChat() {
     setState((s) => ({ ...s, sidebarTab: tab }));
   }, []);
 
+  const startConversationByEmail = useCallback(async (email: string): Promise<void> => {
+    const serverConv = await findOrCreateConversation(email.trim());
+    const uid = serverUserIdRef.current;
+    const mapped = mapServerConversation(serverConv, uid);
+    setConversations((prev) => {
+      if (prev.some((c) => c.id === mapped.id)) return prev;
+      return [mapped, ...prev];
+    });
+    setState((s) => ({ ...s, activeConversationId: mapped.id }));
+  }, []);
+
   const filteredConversations = conversations.filter((c) =>
     c.participant.name
       .toLowerCase()
@@ -300,5 +315,6 @@ export function useChat() {
     sendMessage,
     setSearchQuery,
     setSidebarTab,
+    startConversationByEmail,
   };
 }

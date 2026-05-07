@@ -19,7 +19,11 @@ export async function listConversations(userId: string) {
 export async function findOrCreateDirect(userId: string, targetId: string) {
   const userA = new mongoose.Types.ObjectId(userId);
   const userB = new mongoose.Types.ObjectId(targetId);
-  return Conversation.findOrCreateDirect(userA, userB);
+  const result = await Conversation.findOrCreateDirect(userA, userB);
+  const populated = await Conversation.findById(result.conversation._id)
+    .populate("participants", PARTICIPANT_SELECT)
+    .populate(LAST_MSG_POPULATE);
+  return { conversation: populated!, isNew: result.isNew };
 }
 
 export async function getConversation(userId: string, conversationId: string) {

@@ -8,6 +8,8 @@ export interface User {
   status: UserStatus;
   lastSeen?: string;
   region?: string;
+  email?: string;
+  about?: string;
 }
 
 export interface Message {

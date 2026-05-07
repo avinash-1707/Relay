@@ -1,6 +1,43 @@
-import { motion } from "motion/react";
+"use client";
 
-export default function BlankCanvas() {
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+
+interface Props {
+  onNewMessage: (email: string) => Promise<void>;
+}
+
+export default function BlankCanvas({ onNewMessage }: Props) {
+  const [composing, setComposing] = useState(false);
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSend() {
+    if (!email.trim()) return;
+    setError("");
+    setLoading(true);
+    try {
+      await onNewMessage(email.trim());
+      setComposing(false);
+      setEmail("");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Failed to start conversation";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") handleSend();
+    if (e.key === "Escape") {
+      setComposing(false);
+      setEmail("");
+      setError("");
+    }
+  }
+
   return (
     <div
       style={{
@@ -58,16 +95,12 @@ export default function BlankCanvas() {
       </div>
 
       <div style={{ position: "relative", textAlign: "center", maxWidth: 380 }}>
-        {/* Animated logo mark */}
+        {/* Logo */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            marginBottom: 28,
-            display: "flex",
-            justifyContent: "center",
-          }}
+          style={{ marginBottom: 28, display: "flex", justifyContent: "center" }}
         >
           <div
             style={{
@@ -132,60 +165,147 @@ export default function BlankCanvas() {
           message.
         </motion.p>
 
+        {/* Compose area */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.26, duration: 0.45 }}
-          style={{ display: "flex", justifyContent: "center", gap: 10 }}
         >
-          <button
-            style={{
-              padding: "10px 20px",
-              borderRadius: 10,
-              background: "linear-gradient(135deg,#06b6d4,#2563eb)",
-              border: "none",
-              color: "#fff",
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              fontFamily: "inherit",
-              boxShadow: "0 4px 20px rgba(6,182,212,0.2)",
-            }}
-          >
-            <svg
-              width="14"
-              height="14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
-              />
-            </svg>
-            New message
-          </button>
-          <button
-            style={{
-              padding: "10px 20px",
-              borderRadius: 10,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              color: "rgba(255,255,255,0.55)",
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: "pointer",
-              fontFamily: "inherit",
-            }}
-          >
-            Find contacts
-          </button>
+          <AnimatePresence mode="wait">
+            {composing ? (
+              <motion.div
+                key="compose"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                style={{ display: "flex", flexDirection: "column", gap: 8 }}
+              >
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    autoFocus
+                    type="email"
+                    placeholder="Enter email address…"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                    onKeyDown={handleKeyDown}
+                    disabled={loading}
+                    style={{
+                      flex: 1,
+                      padding: "10px 14px",
+                      borderRadius: 10,
+                      background: "rgba(255,255,255,0.06)",
+                      border: `1px solid ${error ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.12)"}`,
+                      color: "#fff",
+                      fontSize: 13,
+                      fontFamily: "inherit",
+                      outline: "none",
+                    }}
+                  />
+                  <button
+                    onClick={handleSend}
+                    disabled={loading || !email.trim()}
+                    style={{
+                      padding: "10px 18px",
+                      borderRadius: 10,
+                      background: loading || !email.trim()
+                        ? "rgba(6,182,212,0.3)"
+                        : "linear-gradient(135deg,#06b6d4,#2563eb)",
+                      border: "none",
+                      color: "#fff",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: loading || !email.trim() ? "not-allowed" : "pointer",
+                      fontFamily: "inherit",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {loading ? "Opening…" : "Open chat"}
+                  </button>
+                  <button
+                    onClick={() => { setComposing(false); setEmail(""); setError(""); }}
+                    disabled={loading}
+                    style={{
+                      padding: "10px 14px",
+                      borderRadius: 10,
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      color: "rgba(255,255,255,0.45)",
+                      fontSize: 13,
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+                {error && (
+                  <p style={{ fontSize: 12, color: "rgba(239,68,68,0.85)", margin: 0, textAlign: "left" }}>
+                    {error}
+                  </p>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="buttons"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                style={{ display: "flex", justifyContent: "center", gap: 10 }}
+              >
+                <button
+                  onClick={() => setComposing(true)}
+                  style={{
+                    padding: "10px 20px",
+                    borderRadius: 10,
+                    background: "linear-gradient(135deg,#06b6d4,#2563eb)",
+                    border: "none",
+                    color: "#fff",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    fontFamily: "inherit",
+                    boxShadow: "0 4px 20px rgba(6,182,212,0.2)",
+                  }}
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
+                    />
+                  </svg>
+                  New message
+                </button>
+                <button
+                  style={{
+                    padding: "10px 20px",
+                    borderRadius: 10,
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "rgba(255,255,255,0.55)",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  Find contacts
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
         {/* Stats row */}
