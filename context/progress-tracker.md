@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-**Phase 4 — Socket.io Setup + Auth**
+**Phase 9 — Wire Homepage to Real API**
 
 ## Current Goal
 
-Install Socket.io, create the socket initialization module on the server with JWT auth, create a `SocketProvider` on the client, and verify authenticated connections work end-to-end.
+Replace mock data in `useChat` hook with real API calls. Wire conversation list, message history, send, and presence into the homepage UI using real backend endpoints and socket events.
 
 ## Phase Status
 
@@ -15,11 +15,11 @@ Install Socket.io, create the socket initialization module on the server with JW
 | 1 — Auth Backend | ✅ Complete | All auth routes implemented, email verify, Google OAuth, token rotation, replay detection |
 | 2 — Landing Page & Login UI | ✅ Complete | Landing with all sections, login/register forms, Google OAuth button, AuthProvider |
 | 3 — Homepage UI Shell (Mock Data) | ✅ Complete | Sidebar + ChatWindow + BlankCanvas fully built, useChat hook with mock data |
-| 4 — Socket.io Setup + Auth | ⬜ Not Started | |
-| 5 — Presence System | ⬜ Not Started | |
-| 6 — Conversation API | ⬜ Not Started | |
-| 7 — Message API | ⬜ Not Started | |
-| 8 — User API | ⬜ Not Started | |
+| 4 — Socket.io Setup + Auth | ✅ Complete | Socket.io server with JWT auth, presence on connect/disconnect, SocketProvider on client |
+| 5 — Presence System | ✅ Complete | usePresence hook subscribes to presence:update, socket typing events wired |
+| 6 — Conversation API | ✅ Complete | list, findOrCreate, getOne, markRead, mute, archive — all routes live |
+| 7 — Message API | ✅ Complete | paginated fetch, send (HTTP+socket emit), edit, soft-delete — all routes live |
+| 8 — User API | ✅ Complete | getMe, updateMe, searchUsers, getById — all routes live |
 | 9 — Wire Homepage to Real API | ⬜ Not Started | |
 | 10 — Real-Time Messaging Events | ⬜ Not Started | |
 | 11 — Typing Indicators | ⬜ Not Started | |

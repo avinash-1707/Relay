@@ -1,10 +1,15 @@
+import http from "http";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import passport from "./config/passport.js";
 import authRoutes from "./modules/auth/auth.routes.js";
+import conversationRoutes from "./modules/conversation/conversation.routes.js";
+import messageRoutes from "./modules/message/message.routes.js";
+import userRoutes from "./modules/user/user.routes.js";
 import dbConnect from "./config/db.js";
 import env from "./config/env.js";
+import { initSocket } from "./socket/index.js";
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 5000;
@@ -38,15 +43,20 @@ app.use((req, res, next) => {
   next();
 });
 
-// initialize passport (no sessions)
 app.use(passport.initialize());
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/conversations", conversationRoutes);
+app.use("/api/v1/conversations/:conversationId/messages", messageRoutes);
+app.use("/api/v1/users", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("Running with TSX 🚀");
 });
 
-app.listen(PORT, () => {
+const server = http.createServer(app);
+initSocket(server);
+
+server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
