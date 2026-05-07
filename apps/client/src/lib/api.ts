@@ -1,4 +1,6 @@
 import axios from "axios";
+import type { SessionStatus } from "@relay/shared";
+export type { SessionStatus };
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -30,11 +32,6 @@ export interface VerifyEmailResponse {
   message: string;
 }
 
-export interface SessionStatus {
-  active: boolean;
-  userId?: string;
-  expiresAt?: string;
-}
 
 interface ErrorBody {
   message?: string;

@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import Avatar from "../shared/Avatar";
 import type { Conversation } from "../../types";
 

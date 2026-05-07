@@ -1,0 +1,21 @@
+{
+  "name": "relay",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "dev:client": "turbo dev --filter=@relay/client",
+    "dev:server": "turbo dev --filter=@relay/server"
+  },
+  "devDependencies": {
+    "turbo": "^2",
+    "typescript": "^5"
+  },
+  "packageManager": "bun@1.3.5"
+}

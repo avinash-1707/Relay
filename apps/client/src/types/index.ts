@@ -1,5 +1,5 @@
-export type MessageStatus = "sent" | "delivered" | "read";
-export type UserStatus = "online" | "offline" | "away" | "typing";
+export type { MessageStatus, UserStatus } from "@relay/shared";
+import type { UserStatus, MessageStatus } from "@relay/shared";
 
 export interface User {
   id: string;

@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { MessageStatusIcon } from "../shared/StatusIcon";
 import type { Message } from "../../types";
 

@@ -1,14 +1,16 @@
 {
-  "name": "client",
+  "name": "@relay/client",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@relay/shared": "workspace:*",
     "axios": "^1.13.6",
     "motion": "^12.34.3",
     "next": "16.1.6",

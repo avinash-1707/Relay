@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import ConversationItem from "./ConversationItem";
 import type { Conversation } from "../../types";
 
