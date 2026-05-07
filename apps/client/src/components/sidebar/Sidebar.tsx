@@ -1,13 +1,14 @@
 import SidebarHeader from "./SidebarHeader";
 import SearchBar from "./Searchbar";
 import ConversationList from "./ConversationList";
-import type { Conversation, AppState } from "../../types";
+import type { Conversation, AppState, User } from "../../types";
 
 interface Props {
   conversations: Conversation[];
   activeId: string | null;
   searchQuery: string;
   tab: AppState["sidebarTab"];
+  currentUser: User | null;
   onSelect: (id: string) => void;
   onSearch: (q: string) => void;
   onTabChange: (t: AppState["sidebarTab"]) => void;
@@ -18,6 +19,7 @@ export default function Sidebar({
   activeId,
   searchQuery,
   tab,
+  currentUser,
   onSelect,
   onSearch,
   onTabChange,
@@ -36,7 +38,7 @@ export default function Sidebar({
         flexShrink: 0,
       }}
     >
-      <SidebarHeader tab={tab} onTabChange={onTabChange} />
+      <SidebarHeader tab={tab} onTabChange={onTabChange} currentUser={currentUser} />
       <SearchBar value={searchQuery} onChange={onSearch} />
       <ConversationList
         conversations={conversations}

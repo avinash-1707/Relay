@@ -197,3 +197,122 @@ export const getSessionStatus = async (): Promise<SessionStatus> => {
     "Failed to check session status.",
   );
 };
+
+// ─── User API ─────────────────────────────────────────────────────────────────
+
+export interface ServerUser {
+  _id: string;
+  displayName: string;
+  email: string;
+  avatar: string | null;
+  about: string;
+  isOnline: boolean;
+  lastSeen: string | null;
+  createdAt: string;
+}
+
+export const getCurrentUser = async (): Promise<ServerUser> => {
+  const { data } = await api.get<ServerUser>("/api/v1/users/me");
+  return data;
+};
+
+export const searchUsersApi = async (q: string): Promise<ServerUser[]> => {
+  const { data } = await api.get<ServerUser[]>("/api/v1/users/search", {
+    params: { q },
+  });
+  return data;
+};
+
+// ─── Conversation API ─────────────────────────────────────────────────────────
+
+export interface ServerParticipantMeta {
+  user: string;
+  unreadCount: number;
+  isArchived: boolean;
+  isMuted: boolean;
+}
+
+export interface ServerLastMessage {
+  _id: string;
+  body: string;
+  sender: { _id: string; displayName: string; avatar: string | null };
+  createdAt: string;
+  deliveryStatus: "sent" | "delivered" | "read";
+  isDeleted: boolean;
+  messageType: string;
+}
+
+export interface ServerConversation {
+  _id: string;
+  participants: ServerUser[];
+  isGroup: boolean;
+  lastMessage: ServerLastMessage | null;
+  lastMessageAt: string | null;
+  participantMeta: ServerParticipantMeta[];
+}
+
+export const getConversations = async (): Promise<ServerConversation[]> => {
+  const { data } = await api.get<ServerConversation[]>("/api/v1/conversations");
+  return data;
+};
+
+export const findOrCreateConversation = async (
+  targetUserId: string,
+): Promise<ServerConversation> => {
+  const { data } = await api.post<ServerConversation>("/api/v1/conversations", {
+    targetUserId,
+  });
+  return data;
+};
+
+export const markConversationRead = async (
+  conversationId: string,
+): Promise<void> => {
+  await api.patch(`/api/v1/conversations/${conversationId}/read`);
+};
+
+// ─── Message API ──────────────────────────────────────────────────────────────
+
+export interface ServerMessage {
+  _id: string;
+  conversation: string;
+  sender: ServerUser;
+  body: string;
+  messageType: string;
+  deliveryStatus: "sent" | "delivered" | "read";
+  readBy: { user: string; readAt: string }[];
+  isDeleted: boolean;
+  isEdited: boolean;
+  replyTo: { _id: string; body: string; isDeleted: boolean } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MessagesPage {
+  messages: ServerMessage[];
+  hasMore: boolean;
+  nextCursor: string | null;
+}
+
+export const getMessages = async (
+  conversationId: string,
+  before?: string,
+  limit?: number,
+): Promise<MessagesPage> => {
+  const { data } = await api.get<MessagesPage>(
+    `/api/v1/conversations/${conversationId}/messages`,
+    { params: { before, limit } },
+  );
+  return data;
+};
+
+export const sendMessageHttp = async (
+  conversationId: string,
+  body: string,
+): Promise<ServerMessage> => {
+  const { data } = await api.post<ServerMessage>(
+    `/api/v1/conversations/${conversationId}/messages`,
+    { body },
+  );
+  return data;
+};

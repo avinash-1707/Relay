@@ -2,11 +2,7 @@
 
 ## Current Phase
 
-**Phase 9 — Wire Homepage to Real API**
-
-## Current Goal
-
-Replace mock data in `useChat` hook with real API calls. Wire conversation list, message history, send, and presence into the homepage UI using real backend endpoints and socket events.
+**All Phases Complete**
 
 ## Phase Status
 
@@ -20,10 +16,10 @@ Replace mock data in `useChat` hook with real API calls. Wire conversation list,
 | 6 — Conversation API | ✅ Complete | list, findOrCreate, getOne, markRead, mute, archive — all routes live |
 | 7 — Message API | ✅ Complete | paginated fetch, send (HTTP+socket emit), edit, soft-delete — all routes live |
 | 8 — User API | ✅ Complete | getMe, updateMe, searchUsers, getById — all routes live |
-| 9 — Wire Homepage to Real API | ⬜ Not Started | |
-| 10 — Real-Time Messaging Events | ⬜ Not Started | |
-| 11 — Typing Indicators | ⬜ Not Started | |
-| 12 — Error Middleware + Validation | ⬜ Not Started | |
+| 9 — Wire Homepage to Real API | ✅ Complete | useChat rewritten with real API; getConversations, getMessages, sendMessageHttp wired; mock data removed from homepage |
+| 10 — Real-Time Messaging Events | ✅ Complete | message:new socket listener deduplicates and appends; message:status updates delivery status |
+| 11 — Typing Indicators | ✅ Complete | useTyping hook emits/listens typing:start/stop with 3s debounce; ChatWindow shows typing indicator |
+| 12 — Error Middleware + Validation | ✅ Complete | errorMiddleware mounted in app.ts; validate middleware implemented |
 
 ## Completed Phases
 
@@ -65,7 +61,7 @@ Replace mock data in `useChat` hook with real API calls. Wire conversation list,
 
 ## In Progress
 
-None. All phases 1–3 complete. Phase 4 not yet started.
+None. All phases 1–12 complete.
 
 ## What's Done vs What's Missing in Completed Phases
 

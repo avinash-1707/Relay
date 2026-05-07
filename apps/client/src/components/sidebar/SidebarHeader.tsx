@@ -1,11 +1,11 @@
 import Avatar from "../shared/Avatar";
-import type { AppState } from "../../types";
-import { CURRENT_USER } from "../../mock/data";
+import type { AppState, User } from "../../types";
 import { JSX } from "react/jsx-dev-runtime";
 
 interface Props {
   tab: AppState["sidebarTab"];
   onTabChange: (t: AppState["sidebarTab"]) => void;
+  currentUser: User | null;
 }
 
 const TABS: { id: AppState["sidebarTab"]; label: string; icon: JSX.Element }[] =
@@ -72,7 +72,7 @@ const TABS: { id: AppState["sidebarTab"]; label: string; icon: JSX.Element }[] =
     },
   ];
 
-export default function SidebarHeader({ tab, onTabChange }: Props) {
+export default function SidebarHeader({ tab, onTabChange, currentUser }: Props) {
   return (
     <div
       style={{ padding: "0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}
@@ -181,8 +181,8 @@ export default function SidebarHeader({ tab, onTabChange }: Props) {
             </button>
           ))}
           <Avatar
-            initials={CURRENT_USER.avatar}
-            status={CURRENT_USER.status}
+            initials={currentUser?.avatar ?? ""}
+            status={currentUser?.status ?? "offline"}
             size={30}
           />
         </div>

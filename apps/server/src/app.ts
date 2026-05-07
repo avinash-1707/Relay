@@ -10,6 +10,7 @@ import userRoutes from "./modules/user/user.routes.js";
 import dbConnect from "./config/db.js";
 import env from "./config/env.js";
 import { initSocket } from "./socket/index.js";
+import { errorMiddleware } from "./middleware/error.middleware.js";
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 5000;
@@ -53,6 +54,8 @@ app.use("/api/v1/users", userRoutes);
 app.get("/", (req, res) => {
   res.send("Running with TSX 🚀");
 });
+
+app.use(errorMiddleware);
 
 const server = http.createServer(app);
 initSocket(server);

@@ -6,17 +6,20 @@ import { motion, AnimatePresence } from "motion/react";
 interface Props {
   onSend: (text: string) => void;
   participantName: string;
+  onTyping?: () => void;
+  onStopTyping?: () => void;
 }
 
 const EMOJI_SET = ["😊", "👍", "🔥", "🚀", "✅", "💯", "🎯", "⚡"];
 
-export default function ChatInput({ onSend, participantName }: Props) {
+export default function ChatInput({ onSend, participantName, onTyping, onStopTyping }: Props) {
   const [text, setText] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = () => {
     if (!text.trim()) return;
+    onStopTyping?.();
     onSend(text);
     setText("");
     setShowEmoji(false);
@@ -211,7 +214,14 @@ export default function ChatInput({ onSend, participantName }: Props) {
           <textarea
             ref={inputRef}
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              if (e.target.value.trim()) {
+                onTyping?.();
+              } else {
+                onStopTyping?.();
+              }
+            }}
             onKeyDown={handleKey}
             placeholder={`Message ${participantName}...`}
             rows={1}

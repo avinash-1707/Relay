@@ -10,6 +10,7 @@ export default function App() {
     conversations,
     activeConversation,
     state,
+    currentUser,
     selectConversation,
     sendMessage,
     setSearchQuery,
@@ -31,6 +32,7 @@ export default function App() {
         activeId={state.activeConversationId}
         searchQuery={state.searchQuery}
         tab={state.sidebarTab}
+        currentUser={currentUser}
         onSelect={selectConversation}
         onSearch={setSearchQuery}
         onTabChange={setSidebarTab}
@@ -48,6 +50,7 @@ export default function App() {
           <ChatWindow
             conversation={activeConversation}
             currentUserId={state.currentUserId}
+            currentUserDisplayName={currentUser?.name ?? ""}
             onSend={sendMessage}
           />
         ) : (

@@ -3,18 +3,28 @@ import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import type { Conversation } from "../../types";
+import { useTyping } from "../../hooks/useTyping";
 
 interface Props {
   conversation: Conversation;
   currentUserId: string;
+  currentUserDisplayName: string;
   onSend: (text: string) => void;
 }
 
 export default function ChatWindow({
   conversation,
   currentUserId,
+  currentUserDisplayName,
   onSend,
 }: Props) {
+  const { typingUsers, notifyTyping, stopTyping } = useTyping(
+    conversation.id,
+    currentUserDisplayName,
+  );
+
+  const typingNames = Object.values(typingUsers);
+
   return (
     <motion.div
       key={conversation.id}
@@ -94,9 +104,35 @@ export default function ChatWindow({
           currentUserId={currentUserId}
           participantName={conversation.participant.name}
         />
+
+        {typingNames.length > 0 && (
+          <div
+            style={{
+              padding: "0 24px 6px",
+              fontSize: 12,
+              color: "rgba(34,211,238,0.55)",
+              flexShrink: 0,
+            }}
+          >
+            {typingNames[0]} is typing
+            <span
+              style={{
+                display: "inline-block",
+                marginLeft: 2,
+                letterSpacing: 2,
+                animation: "blink 1.2s step-start infinite",
+              }}
+            >
+              ...
+            </span>
+          </div>
+        )}
+
         <ChatInput
           onSend={onSend}
           participantName={conversation.participant.name.split(" ")[0]}
+          onTyping={notifyTyping}
+          onStopTyping={stopTyping}
         />
       </div>
     </motion.div>
