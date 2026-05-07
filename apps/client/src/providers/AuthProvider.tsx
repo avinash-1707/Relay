@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { api, getSessionStatus } from "@/lib/api";
+import { api, getSessionStatus, refreshAccessToken } from "@/lib/api";
 
 const ACCESS_TOKEN_KEY = "relay_access_token";
 
@@ -20,11 +20,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         api.defaults.headers.common.Authorization = `Bearer ${tokenFromStorage}`;
       }
 
-      // Check if session is still valid via refresh token (cookie)
       try {
         const session = await getSessionStatus();
-        if (!session.active && !tokenFromStorage) {
-          // No valid session, redirect away from protected pages
+        if (session.active) {
+          if (!tokenFromStorage) {
+            // Session active but no stored access token (e.g., right after Google OAuth).
+            // Silently exchange the httpOnly refresh cookie for an access token.
+            try {
+              const { accessToken } = await refreshAccessToken();
+              localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+              api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+            } catch {
+              router.push("/login");
+            }
+          }
+        } else if (!tokenFromStorage) {
           if (
             window.location.pathname !== "/login" &&
             !window.location.pathname.startsWith("/login")

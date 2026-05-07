@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as service from "./auth.service.js";
 import Token from "./token.model.js";
-import { signAccessToken } from "../../utils/jwt.js";
 import env from "../../config/env.js";
 
 const cookieName = "refreshToken";
@@ -110,7 +109,6 @@ export const googleCallback = async (
     if (!user)
       return res.status(400).json({ message: "Authentication failed" });
 
-    const accessToken = signAccessToken(String(user._id));
     const { rawToken } = await Token.createToken(user._id, {
       type: "REFRESH",
       ttlDays: env.REFRESH_TOKEN_TTL_DAYS,
@@ -119,11 +117,7 @@ export const googleCallback = async (
     });
 
     setRefreshCookie(res, rawToken);
-
-    // Redirect with access token in URL fragment so the SPA can read it client-side.
-    const redirectUrl = new URL(`${env.APP_URL}/homepage`);
-    redirectUrl.hash = new URLSearchParams({ accessToken }).toString();
-    res.redirect(redirectUrl.toString());
+    res.redirect(`${env.APP_URL}/homepage`);
   } catch (err) {
     next(err);
   }

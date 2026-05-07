@@ -142,7 +142,7 @@ relay/                                # Turborepo monorepo root
 | POST | `/logout` | Cookie | Revoke refresh token, clear cookie |
 | GET | `/session` | Cookie | Return `{ active, userId, expiresAt }` |
 | GET | `/google` | None | Redirect to Google OAuth (sets state cookie) |
-| GET | `/google/callback` | None | OAuth callback, creates/updates user, redirects to `/homepage#accessToken=...` |
+| GET | `/google/callback` | None | OAuth callback, creates/updates user, sets refresh cookie, redirects to `/homepage` (no token in URL) |
 
 ### Conversations — `/api/v1/conversations` (routes not yet wired in app.ts)
 

@@ -953,27 +953,6 @@ export default function RelayAuth() {
     checkSession();
   }, [router]);
 
-  useEffect(() => {
-    const hash = window.location.hash.startsWith("#")
-      ? window.location.hash.slice(1)
-      : "";
-    if (!hash) return;
-
-    const params = new URLSearchParams(hash);
-    const accessToken = params.get("accessToken");
-    if (!accessToken) return;
-
-    persistAccessToken(accessToken, true);
-    api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-    window.history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}${window.location.search}`,
-    );
-    setSuccess(true);
-    setTimeout(() => router.push("/homepage"), 900);
-  }, [router]);
-
   const handleLoginSuccess = (accessToken: string, rememberMe: boolean) => {
     persistAccessToken(accessToken, rememberMe);
     api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;

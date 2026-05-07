@@ -21,6 +21,10 @@
 | 11 — Typing Indicators | ✅ Complete | useTyping hook emits/listens typing:start/stop with 3s debounce; ChatWindow shows typing indicator |
 | 12 — Error Middleware + Validation | ✅ Complete | errorMiddleware mounted in app.ts; validate middleware implemented |
 
+## Bug Fixes
+
+- **Google OAuth token not extracted on homepage** — `AuthProvider` now extracts `accessToken` from URL hash on mount, stores in `localStorage`, clears hash from URL. Previously the token sat in the URL bar indefinitely and was never used.
+
 ## Completed Phases
 
 ### Phase 1 — Auth Backend ✅
