@@ -1,179 +1,383 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { useScrollReveal } from "../../hooks/useScrollReveal";
 
-const messages = [
-  {
-    id: 1,
-    from: "them",
-    name: "Sena",
-    text: "Deployment went out. All green ✓",
-    time: "09:41",
-    delay: 0,
-  },
-  {
-    id: 2,
-    from: "me",
-    text: "Latency looking solid — P99 at 140ms",
-    time: "09:41",
-    delay: 600,
-  },
-  {
-    id: 3,
-    from: "them",
-    name: "Sena",
-    text: "Relay handled 2M events in the last hour",
-    time: "09:42",
-    delay: 1400,
-  },
-  {
-    id: 4,
-    from: "me",
-    text: "Zero drops. That's what I like to see.",
-    time: "09:42",
-    delay: 2200,
-  },
-  {
-    id: 5,
-    from: "them",
-    name: "Sena",
-    text: "Spinning up the Singapore node now 🌏",
-    time: "09:43",
-    delay: 3100,
-  },
-];
+const ease = [0.22, 1, 0.36, 1] as const;
 
-function ChatBubble({
-  msg,
-  visible,
-}: {
-  msg: (typeof messages)[0];
-  visible: boolean;
-}) {
-  const isMe = msg.from === "me";
+/* ── Avatars ── */
+function AvatarDot({ initial, color, online }: { initial: string; color: string; online: boolean }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12, scale: 0.96 }}
-      animate={visible ? { opacity: 1, y: 0, scale: 1 } : {}}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className={`flex items-end gap-2.5 ${isMe ? "flex-row-reverse" : ""}`}
-    >
-      {!isMe && (
-        <div className="w-7 h-7 rounded-full bg-linear-to-br from-violet-500 to-purple-700 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
-          {msg.name?.[0]}
-        </div>
-      )}
+    <div style={{ position: "relative", flexShrink: 0 }}>
       <div
-        className={`max-w-[78%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-1`}
+        style={{
+          width:          28,
+          height:         28,
+          borderRadius:   "50%",
+          background:     color,
+          display:        "flex",
+          alignItems:     "center",
+          justifyContent: "center",
+          fontSize:       11,
+          fontWeight:     700,
+          color:          "#fff",
+        }}
       >
-        <div
-          className={`px-3.5 py-2 rounded-2xl text-[13px] leading-relaxed ${
-            isMe
-              ? "bg-linear-to-br from-cyan-500 to-blue-600 text-white rounded-br-sm"
-              : "bg-white/8 text-white/85 rounded-bl-sm"
-          }`}
-        >
-          {msg.text}
-        </div>
-        <span className="text-[10px] text-white/25 px-1">{msg.time}</span>
+        {initial}
       </div>
-    </motion.div>
+      <div
+        style={{
+          position:     "absolute",
+          bottom:       1,
+          right:        1,
+          width:        7,
+          height:       7,
+          borderRadius: "50%",
+          background:   online ? "#22C55E" : "rgba(var(--border-rgb), 0.2)",
+          border:       "2px solid var(--void)",
+          boxShadow:    online ? "0 0 5px rgba(34,197,94,0.7)" : "none",
+        }}
+      />
+    </div>
   );
 }
 
-function MockChat() {
-  const [visibleCount, setVisibleCount] = useState(0);
-  const { ref, isInView } = useScrollReveal();
-
-  useEffect(() => {
-    if (!isInView) return;
-    let cancelled = false;
-    messages.forEach((msg, i) => {
-      setTimeout(() => {
-        if (!cancelled) setVisibleCount(i + 1);
-      }, msg.delay);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [isInView]);
-
+/* ── Mini chat window ── */
+function MiniWindow({
+  title,
+  isMe,
+  messages,
+  typing,
+  inputPlaceholder,
+}: {
+  title: string;
+  isMe: boolean;
+  messages: { text: string; visible: boolean; own: boolean }[];
+  typing: boolean;
+  inputPlaceholder: string;
+}) {
   return (
-    <div ref={ref} className="relative">
-      {/* Window chrome */}
-      <div className="rounded-2xl border border-white/10 bg-[#0D1117] overflow-hidden shadow-2xl shadow-black/50">
-        {/* Title bar */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/2">
-          <div className="flex gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-            <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-          </div>
-          <div className="flex-1 flex items-center justify-center">
-            <div className="flex items-center gap-2 text-xs text-white/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              relay-team · 3 members
-            </div>
+    <div
+      style={{
+        flex:         1,
+        minWidth:     0,
+        borderRadius: 18,
+        background:   "var(--void)",
+        border:       `1px solid ${isMe ? "rgba(245,166,35,0.15)" : "rgba(139,92,246,0.15)"}`,
+        overflow:     "hidden",
+        boxShadow:    isMe
+          ? "0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.04) inset"
+          : "0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.04) inset",
+      }}
+    >
+      {/* Window header */}
+      <div
+        style={{
+          display:      "flex",
+          alignItems:   "center",
+          gap:          8,
+          padding:      "10px 12px",
+          borderBottom: `1px solid ${isMe ? "rgba(245,166,35,0.07)" : "rgba(139,92,246,0.07)"}`,
+          background:   isMe ? "rgba(245,166,35,0.02)" : "rgba(139,92,246,0.02)",
+        }}
+      >
+        <AvatarDot
+          initial={isMe ? "Y" : "A"}
+          color={isMe ? "linear-gradient(135deg,#F5A623,#D97706)" : "linear-gradient(135deg,#8B5CF6,#5B21B6)"}
+          online
+        />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text)" }}>{title}</div>
+          <div
+            style={{
+              fontSize:      9,
+              color:         "rgba(34,197,94,0.7)",
+              fontFamily:    "monospace",
+              letterSpacing: "0.08em",
+            }}
+          >
+            ONLINE
           </div>
         </div>
+        <div
+          style={{
+            fontSize:      8,
+            fontFamily:    "monospace",
+            letterSpacing: "0.08em",
+            color:         isMe ? "rgba(245,166,35,0.4)" : "rgba(139,92,246,0.4)",
+            textTransform: "uppercase",
+            padding:       "2px 7px",
+            borderRadius:  100,
+            border:        `1px solid ${isMe ? "rgba(245,166,35,0.14)" : "rgba(139,92,246,0.14)"}`,
+          }}
+        >
+          E2E
+        </div>
+      </div>
 
-        {/* Messages area */}
-        <div className="p-5 flex flex-col gap-4 min-h-70">
-          {messages.map((msg, i) => (
-            <ChatBubble key={msg.id} msg={msg} visible={i < visibleCount} />
-          ))}
+      {/* Messages */}
+      <div
+        style={{
+          padding:       "12px 10px",
+          display:       "flex",
+          flexDirection: "column",
+          gap:           8,
+          minHeight:     180,
+        }}
+      >
+        {messages.map((msg, i) => (
+          <AnimatePresence key={i}>
+            {msg.visible && (
+              <motion.div
+                initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.28, ease }}
+                style={{ display: "flex", justifyContent: msg.own ? "flex-end" : "flex-start" }}
+              >
+                <div
+                  style={{
+                    maxWidth:   "85%",
+                    padding:    "7px 10px",
+                    borderRadius: msg.own ? "12px 12px 3px 12px" : "12px 12px 12px 3px",
+                    background: msg.own
+                      ? "linear-gradient(145deg,rgba(245,166,35,0.2),rgba(43,127,255,0.15))"
+                      : "rgba(var(--panel-rgb), 0.95)",
+                    border: msg.own
+                      ? "1px solid rgba(245,166,35,0.25)"
+                      : "1px solid rgba(139,92,246,0.15)",
+                    fontSize:   11,
+                    lineHeight: 1.45,
+                    color:      "var(--text)",
+                    display:    "flex",
+                    alignItems: "flex-end",
+                    gap:        4,
+                  }}
+                >
+                  <span>{msg.text}</span>
+                  {msg.own && (
+                    <span style={{ fontSize: 8, color: "rgba(245,166,35,0.7)", flexShrink: 0 }}>✓✓</span>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        ))}
 
-          {/* Typing indicator */}
-          {visibleCount >= messages.length && (
+        {/* Typing */}
+        <AnimatePresence>
+          {typing && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="flex items-center gap-2"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              transition={{ duration: 0.2 }}
+              style={{ display: "flex", alignItems: "center", gap: 6 }}
             >
-              <div className="w-7 h-7 rounded-full bg-linear-to-br from-violet-500 to-purple-700 shrink-0" />
-              <div className="flex items-center gap-1 px-3.5 py-2.5 rounded-2xl rounded-bl-sm bg-white/8">
-                {[0, 0.15, 0.3].map((d) => (
-                  <motion.span
-                    key={d}
-                    className="w-1.5 h-1.5 rounded-full bg-white/40"
-                    animate={{ y: [0, -4, 0] }}
-                    transition={{ duration: 0.6, repeat: Infinity, delay: d }}
+              <div
+                style={{
+                  display:      "flex",
+                  alignItems:   "center",
+                  gap:          3,
+                  padding:      "7px 10px",
+                  borderRadius: "12px 12px 12px 3px",
+                  background:   "rgba(var(--panel-rgb), 0.95)",
+                  border:       "1px solid rgba(139,92,246,0.15)",
+                  height:       30,
+                }}
+              >
+                {(["waveform-a", "waveform-b", "waveform-c"] as const).map((a, j) => (
+                  <div
+                    key={j}
+                    style={{
+                      width:          2.5,
+                      borderRadius:   2,
+                      background:     isMe ? "rgba(245,166,35,0.55)" : "rgba(139,92,246,0.6)",
+                      animation:      `${a} 0.9s ease-in-out infinite`,
+                      animationDelay: `${j * 0.12}s`,
+                    }}
                   />
                 ))}
               </div>
             </motion.div>
           )}
-        </div>
+        </AnimatePresence>
+      </div>
 
-        {/* Input bar */}
-        <div className="px-4 pb-4">
-          <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/4 border border-white/6">
-            <span className="text-sm text-white/20 flex-1">
-              Reply to team...
-            </span>
-            <svg
-              width="16"
-              height="16"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-              className="text-cyan-400"
-            >
+      {/* Input */}
+      <div style={{ padding: "0 10px 10px" }}>
+        <div
+          style={{
+            display:     "flex",
+            alignItems:  "center",
+            gap:         7,
+            padding:     "7px 10px",
+            borderRadius: 10,
+            background:  "rgba(var(--border-rgb), 0.03)",
+            border:      `1px solid ${isMe ? "rgba(245,166,35,0.1)" : "rgba(139,92,246,0.1)"}`,
+          }}
+        >
+          <span
+            style={{
+              flex:       1,
+              fontSize:   9,
+              color:      "rgba(var(--text-rgb), 0.15)",
+              fontFamily: "monospace",
+            }}
+          >
+            {inputPlaceholder}
+          </span>
+          <div
+            style={{
+              width:          20,
+              height:         20,
+              borderRadius:   "50%",
+              background:     isMe
+                ? "linear-gradient(145deg,#F5A623,#D97706)"
+                : "linear-gradient(135deg,#8B5CF6,#5B21B6)",
+              display:        "flex",
+              alignItems:     "center",
+              justifyContent: "center",
+              flexShrink:     0,
+            }}
+          >
+            <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24" style={{ color: "#fff" }}>
               <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
             </svg>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Latency badge */}
-      <motion.div
-        initial={{ opacity: 0, x: 16 }}
-        animate={isInView ? { opacity: 1, x: 0 } : {}}
-        transition={{ delay: 0.4, duration: 0.5 }}
-        className="absolute -right-5 -bottom-5 px-3 py-2 rounded-xl bg-green-500/10 border border-green-500/20 text-xs font-mono text-green-400"
+/* ── Dual window with synced animation ── */
+function DualChatDemo() {
+  const { ref, isInView } = useScrollReveal();
+
+  const CONVO = [
+    { text: "Hey! Are you free tonight?",          sender: "them" },
+    { text: "Yeah! What's the plan?",              sender: "me"   },
+    { text: "Let's hop on a quick call 📞",        sender: "them" },
+    { text: "Give me 5 mins, then I'm good to go.", sender: "me"  },
+  ];
+
+  const [step, setStep] = useState(0);
+  const [typing, setTyping] = useState(false);
+
+  useEffect(() => {
+    if (!isInView) return;
+    let cancelled = false;
+    let timers: ReturnType<typeof setTimeout>[] = [];
+
+    function run() {
+      setStep(0);
+      setTyping(false);
+      timers.forEach(clearTimeout);
+      const delays = [600, 1600, 2700, 3800];
+      timers = [
+        ...delays.map((d, i) =>
+          setTimeout(() => { if (!cancelled) setStep(i + 1); }, d)
+        ),
+        setTimeout(() => { if (!cancelled) setTyping(true); }, 4600),
+        setTimeout(() => { if (!cancelled) run(); }, 7000),
+      ];
+    }
+
+    run();
+    return () => { cancelled = true; timers.forEach(clearTimeout); };
+  }, [isInView]);
+
+  const youMsgs = CONVO.map((m, i) => ({
+    text:    m.text,
+    visible: i < step,
+    own:     m.sender === "me",
+  }));
+  const themMsgs = CONVO.map((m, i) => ({
+    text:    m.text,
+    visible: i < step,
+    own:     m.sender === "them",
+  }));
+
+  return (
+    <div ref={ref} style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+      <MiniWindow
+        title="You"
+        isMe
+        messages={youMsgs}
+        typing={false}
+        inputPlaceholder="MESSAGE ALEX..."
+      />
+
+      {/* Signal pulse between windows */}
+      <div
+        style={{
+          display:        "flex",
+          flexDirection:  "column",
+          alignItems:     "center",
+          justifyContent: "center",
+          gap:            8,
+          paddingTop:     56,
+          flexShrink:     0,
+          width:          48,
+        }}
       >
-        ↓ 128ms · NYC → SGP
-      </motion.div>
+        <div
+          style={{
+            width:        8,
+            height:       8,
+            borderRadius: "50%",
+            background:   "#F5A623",
+            boxShadow:    "0 0 10px rgba(245,166,35,0.7)",
+            animation:    "neon-pulse 1.6s ease-in-out infinite",
+          }}
+        />
+        <div
+          style={{
+            width:      1,
+            height:     40,
+            background: "linear-gradient(180deg,rgba(245,166,35,0.3),rgba(139,92,246,0.3))",
+          }}
+        />
+        <div
+          style={{
+            fontSize:      8,
+            fontFamily:    "monospace",
+            color:         "rgba(var(--text-rgb), 0.2)",
+            letterSpacing: "0.08em",
+            textAlign:     "center",
+            textTransform: "uppercase",
+            lineHeight:    1.5,
+          }}
+        >
+          RELAY
+        </div>
+        <div
+          style={{
+            width:      1,
+            height:     40,
+            background: "linear-gradient(180deg,rgba(139,92,246,0.3),rgba(245,166,35,0.3))",
+          }}
+        />
+        <div
+          style={{
+            width:        8,
+            height:       8,
+            borderRadius: "50%",
+            background:   "#8B5CF6",
+            boxShadow:    "0 0 10px rgba(139,92,246,0.7)",
+            animation:    "neon-pulse 1.6s ease-in-out infinite 0.4s",
+          }}
+        />
+      </div>
+
+      <MiniWindow
+        title="Alex"
+        isMe={false}
+        messages={themMsgs}
+        typing={typing}
+        inputPlaceholder="REPLY..."
+      />
     </div>
   );
 }
@@ -182,79 +386,119 @@ export default function RealTime() {
   const { ref, isInView } = useScrollReveal();
 
   return (
-    <section className="py-28 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-          {/* Left: explanation */}
+    <section id="how-it-works" style={{ padding: "100px 24px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div
+          style={{
+            display:             "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap:                 "clamp(40px, 6vw, 80px)",
+            alignItems:          "center",
+          }}
+        >
+          {/* Left: text */}
           <div ref={ref}>
             <motion.p
               initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 1 } : {}}
               transition={{ duration: 0.4 }}
-              className="text-xs font-semibold tracking-[0.15em] text-cyan-400 uppercase mb-3"
+              style={{
+                fontSize:      10,
+                fontFamily:    "monospace",
+                letterSpacing: "0.22em",
+                color:         "rgba(245,166,35,0.6)",
+                textTransform: "uppercase",
+                marginBottom:  14,
+              }}
             >
-              Real-time experience
+              // TWO_SIDES_ONE_RELAY
             </motion.p>
+
             <motion.h2
               initial={{ opacity: 0, y: 16 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.06 }}
-              className="text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-5"
+              transition={{ duration: 0.5, delay: 0.06, ease }}
+              style={{
+                fontSize:      "clamp(26px, 3.5vw, 40px)",
+                fontWeight:    800,
+                letterSpacing: "-0.03em",
+                lineHeight:    1.1,
+                color:         "var(--text)",
+                marginBottom:  18,
+              }}
             >
-              Delivery that feels instant. Because it is.
+              What you send,
+              <br />
+              they see.{" "}
+              <span style={{ color: "#F5A623" }}>Instantly.</span>
             </motion.h2>
+
             <motion.p
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.12 }}
-              className="text-white/45 text-base leading-relaxed mb-10"
+              transition={{ duration: 0.5, delay: 0.12, ease }}
+              style={{
+                fontSize:     14,
+                color:        "rgba(var(--text-rgb), 0.4)",
+                lineHeight:   1.8,
+                marginBottom: 36,
+              }}
             >
-              Relay's architecture prioritizes low-latency over everything.
-              WebSocket connections are maintained at the edge, with intelligent
-              routing ensuring the shortest network path.
+              Socket.io keeps a persistent connection open between both participants.
+              When you hit send, the message travels in real time — no page refresh, no delay.
             </motion.p>
 
-            {/* Callouts */}
-            <div className="flex flex-col gap-5">
+            {/* Detail points */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {[
-                {
-                  label: "Persistent connections",
-                  desc: "Long-lived WebSocket sessions at every edge node.",
-                },
-                {
-                  label: "Optimistic delivery",
-                  desc: "Messages rendered locally before server confirmation.",
-                },
-                {
-                  label: "Conflict-free sync",
-                  desc: "CRDT-based state ensures consistency without locking.",
-                },
+                { label: "Persistent WebSocket",  desc: "Connection stays open — no polling, no latency spikes." },
+                { label: "Typing awareness",       desc: "The other person sees when you start and stop typing." },
+                { label: "Message status",         desc: "Sent → Delivered → Read, updated automatically." },
               ].map((item, i) => (
                 <motion.div
                   key={item.label}
-                  initial={{ opacity: 0, x: -16 }}
+                  initial={{ opacity: 0, x: -14 }}
                   animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.45, delay: 0.18 + i * 0.07 }}
-                  className="flex gap-4"
+                  transition={{ duration: 0.45, delay: 0.2 + i * 0.08, ease }}
+                  style={{ display: "flex", gap: 12 }}
                 >
-                  <div className="w-5 h-5 rounded-full bg-cyan-500/15 flex items-center justify-center shrink-0 mt-0.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  <div
+                    style={{
+                      width:          18,
+                      height:         18,
+                      borderRadius:   "50%",
+                      background:     "rgba(245,166,35,0.1)",
+                      border:         "1px solid rgba(245,166,35,0.2)",
+                      display:        "flex",
+                      alignItems:     "center",
+                      justifyContent: "center",
+                      flexShrink:     0,
+                      marginTop:      3,
+                    }}
+                  >
+                    <div style={{ width: 5, height: 5, borderRadius: "50%", background: "rgba(245,166,35,0.75)" }} />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-white mb-0.5">
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", marginBottom: 2 }}>
                       {item.label}
                     </div>
-                    <div className="text-sm text-white/40">{item.desc}</div>
+                    <div style={{ fontSize: 12.5, color: "rgba(var(--text-rgb), 0.35)", lineHeight: 1.6 }}>
+                      {item.desc}
+                    </div>
                   </div>
                 </motion.div>
               ))}
             </div>
           </div>
 
-          {/* Right: mock chat */}
-          <div className="relative lg:pl-4">
-            <MockChat />
-          </div>
+          {/* Right: dual demo */}
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.15, ease }}
+          >
+            <DualChatDemo />
+          </motion.div>
         </div>
       </div>
     </section>

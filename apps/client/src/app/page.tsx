@@ -9,7 +9,7 @@ import Footer from "@/components/landing/Footer";
 
 export default function App() {
   return (
-    <div className="bg-[#080B11] text-white min-h-screen font-sans antialiased overflow-x-hidden">
+    <div className="min-h-screen font-sans antialiased overflow-x-hidden" style={{ background: "var(--void)", color: "var(--text)" }}>
       <Navbar />
       <main>
         <Hero />

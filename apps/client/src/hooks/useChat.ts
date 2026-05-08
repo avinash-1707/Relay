@@ -85,6 +85,7 @@ function mapServerConversation(
             text: lastMsg.body,
             timestamp: formatTime(lastMsg.createdAt),
             status: lastMsg.deliveryStatus,
+            messageType: lastMsg.messageType,
           },
         ]
       : [];
@@ -111,6 +112,7 @@ interface RawSocketMessage {
   isDeleted: boolean;
   isEdited: boolean;
   createdAt: string;
+  attachments?: ServerAttachment[];
 }
 
 interface RawStatusEvent {
@@ -177,6 +179,8 @@ export function useChat() {
         text: msg.isDeleted ? "This message was deleted" : msg.body,
         timestamp: formatTime(msg.createdAt),
         status: msg.deliveryStatus,
+        messageType: msg.messageType,
+        attachments: (msg.attachments ?? []) as Attachment[],
       };
       const convId = msg.conversation;
 

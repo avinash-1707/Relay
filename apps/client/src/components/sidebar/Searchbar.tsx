@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 
 interface Props {
@@ -9,73 +11,90 @@ export default function SearchBar({ value, onChange }: Props) {
   const [focused, setFocused] = useState(false);
 
   return (
-    <div style={{ padding: "12px 16px" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          padding: "9px 14px",
-          borderRadius: 10,
-          border: `1px solid ${focused ? "rgba(34,211,238,0.25)" : "rgba(255,255,255,0.06)"}`,
-          background: focused
-            ? "rgba(34,211,238,0.03)"
-            : "rgba(255,255,255,0.03)",
-          transition: "all 0.2s",
-          boxShadow: focused ? "0 0 0 3px rgba(34,211,238,0.06)" : "none",
-        }}
-      >
-        <svg
-          width="14"
-          height="14"
-          fill="none"
-          stroke={focused ? "#22d3ee" : "rgba(255,255,255,0.25)"}
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-          style={{ flexShrink: 0, transition: "stroke 0.2s" }}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+    <div style={{ padding: "10px 14px 8px" }}>
+      <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+        {/* Scanner sweep on focus */}
+        {focused && (
+          <div
+            style={{
+              position:    "absolute",
+              top:         0,
+              bottom:      0,
+              width:       "2px",
+              background:  "linear-gradient(180deg,transparent,#F5A623,transparent)",
+              borderRadius: 1,
+              animation:   "scanner-sweep 1.8s ease-in-out infinite",
+              pointerEvents: "none",
+              zIndex:       2,
+              opacity:      0.55,
+            }}
           />
-        </svg>
+        )}
+
+        {/* Search icon */}
+        <div
+          style={{
+            position:  "absolute",
+            left:      11,
+            color:     focused ? "#F5A623" : "rgba(var(--text-rgb), 0.22)",
+            transition: "color 0.2s",
+            lineHeight: 0,
+            zIndex:     1,
+          }}
+        >
+          <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+        </div>
+
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder="Search conversations..."
+          placeholder="SEARCH COMMS..."
           style={{
-            background: "transparent",
-            border: "none",
-            outline: "none",
-            color: "#fff",
-            fontSize: 13,
-            width: "100%",
-            fontFamily: "inherit",
+            width:        "100%",
+            padding:      "8px 30px 8px 32px",
+            borderRadius: 10,
+            border:       focused
+              ? "1px solid rgba(245,166,35,0.3)"
+              : "1px solid rgba(var(--border-rgb), 0.055)",
+            background:   focused ? "rgba(245,166,35,0.04)" : "rgba(var(--border-rgb), 0.03)",
+            color:        "var(--text)",
+            fontSize:     10,
+            fontFamily:   "'Geist Mono', monospace",
+            letterSpacing: "0.07em",
+            outline:      "none",
+            transition:   "all 0.22s",
+            boxShadow:    focused
+              ? "0 0 0 3px rgba(245,166,35,0.05), 0 0 18px rgba(245,166,35,0.05)"
+              : "none",
           }}
         />
+
         {value && (
           <button
             onClick={() => onChange("")}
             style={{
-              background: "none",
-              border: "none",
-              color: "rgba(255,255,255,0.3)",
-              cursor: "pointer",
-              padding: 0,
-              display: "flex",
+              position:   "absolute",
+              right:      8,
+              width:      17,
+              height:     17,
+              borderRadius: "50%",
+              background: "rgba(var(--border-rgb), 0.07)",
+              border:     "none",
+              color:      "rgba(var(--text-rgb), 0.45)",
+              cursor:     "pointer",
+              display:    "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize:   9,
               lineHeight: 1,
+              transition: "background 0.15s",
             }}
           >
-            <svg width="13" height="13" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-                clipRule="evenodd"
-              />
-            </svg>
+            ✕
           </button>
         )}
       </div>

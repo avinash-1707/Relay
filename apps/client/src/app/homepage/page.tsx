@@ -42,7 +42,7 @@ export default function App() {
         display: "flex",
         height: "100vh",
         overflow: "hidden",
-        background: "#080B11",
+        background: "var(--void)",
         fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
       }}
     >
