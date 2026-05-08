@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageStatusIcon } from "../shared/StatusIcon";
 import type { Message, Attachment } from "../../types";
 
@@ -36,33 +37,159 @@ function ImageAttachment({ att }: { att: Attachment }) {
   );
 }
 
-function AudioAttachment({ att }: { att: Attachment }) {
+/* ─── Deterministic waveform bars from URL seed ─────────────────────────── */
+
+function seedBars(seed: string, count: number): number[] {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) {
+    h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
+  }
+  return Array.from({ length: count }, (_, i) => {
+    h = (Math.imul(1664525, h) + 1013904223) | 0;
+    const t = i / count;
+    // bell-ish envelope so edges are quieter
+    const env = Math.sin(Math.PI * t) * 0.55 + 0.45;
+    return (((h >>> 0) / 0xffffffff) * 0.75 + 0.25) * env;
+  });
+}
+
+function fmt(secs: number): string {
+  const m = Math.floor(secs / 60);
+  const s = Math.floor(secs % 60);
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function AudioAttachment({ att, isOwn }: { att: Attachment; isOwn: boolean }) {
+  const [playing,  setPlaying]  = useState(false);
+  const [current,  setCurrent]  = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef  = useRef<HTMLAudioElement>(null);
+  const BAR_COUNT = 40;
+  const bars      = useRef(seedBars(att.url, BAR_COUNT)).current;
+
+  const accent = isOwn ? "#F5A623" : "#8B5CF6";
+  const dimAlpha = isOwn ? "rgba(245,166,35,0.22)" : "rgba(139,92,246,0.22)";
+
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    const onMeta  = () => setDuration(el.duration || 0);
+    const onTime  = () => setCurrent(el.currentTime);
+    const onEnded = () => { setPlaying(false); setCurrent(0); };
+    el.addEventListener("loadedmetadata", onMeta);
+    el.addEventListener("timeupdate", onTime);
+    el.addEventListener("ended", onEnded);
+    return () => {
+      el.removeEventListener("loadedmetadata", onMeta);
+      el.removeEventListener("timeupdate", onTime);
+      el.removeEventListener("ended", onEnded);
+    };
+  }, []);
+
+  const togglePlay = useCallback(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (playing) { el.pause(); setPlaying(false); }
+    else         { el.play(); setPlaying(true); }
+  }, [playing]);
+
+  const seekTo = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = audioRef.current;
+    if (!el || !duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    el.currentTime = ratio * duration;
+    setCurrent(el.currentTime);
+  }, [duration]);
+
+  const progress = duration > 0 ? current / duration : 0;
+  const displayTime = playing || current > 0 ? fmt(current) : fmt(duration);
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 10, width: 220, padding: "2px 0" }}>
+      {/* Hidden audio element */}
+      <audio ref={audioRef} src={att.url} preload="metadata" />
+
+      {/* Play / Pause button */}
+      <button
+        onClick={togglePlay}
+        style={{
+          width:          42,
+          height:         42,
+          borderRadius:   "50%",
+          border:         "none",
+          background:     accent,
+          color:          "#060912",
+          cursor:         "pointer",
+          display:        "flex",
+          alignItems:     "center",
+          justifyContent: "center",
+          flexShrink:     0,
+          boxShadow:      `0 2px 12px ${accent}55`,
+          transition:     "transform 0.12s, box-shadow 0.12s",
+        }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.07)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)"; }}
+      >
+        {playing ? (
+          /* Pause icon */
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor">
+            <rect x="1.5" y="1" width="3.5" height="11" rx="1.2" />
+            <rect x="8"   y="1" width="3.5" height="11" rx="1.2" />
+          </svg>
+        ) : (
+          /* Play icon */
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor">
+            <path d="M2.5 1.8l9 4.7-9 4.7V1.8z" />
+          </svg>
+        )}
+      </button>
+
+      {/* Waveform + time */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 5, minWidth: 0 }}>
+        {/* Waveform bars */}
         <div
+          onClick={seekTo}
           style={{
-            width:          28,
-            height:         28,
-            borderRadius:   "50%",
-            background:     "rgba(245,166,35,0.12)",
-            border:         "1px solid rgba(245,166,35,0.22)",
-            display:        "flex",
-            alignItems:     "center",
-            justifyContent: "center",
-            flexShrink:     0,
+            display:     "flex",
+            alignItems:  "center",
+            gap:         2,
+            height:      28,
+            cursor:      "pointer",
+            userSelect:  "none",
           }}
         >
-          <svg width="11" height="11" fill="none" stroke="#F5A623" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-          </svg>
+          {bars.map((h, i) => {
+            const barProgress = i / BAR_COUNT;
+            const played = barProgress < progress;
+            return (
+              <div
+                key={i}
+                style={{
+                  flex:         "0 0 2px",
+                  borderRadius: 2,
+                  height:       `${Math.round(h * 100)}%`,
+                  background:   played ? accent : dimAlpha,
+                  transition:   "background 0.08s",
+                }}
+              />
+            );
+          })}
         </div>
-        <span style={{ fontSize: 11, color: "rgba(var(--text-rgb), 0.5)" }}>
-          {att.fileName ?? "Voice message"}
-          {att.fileSize ? ` · ${formatBytes(att.fileSize)}` : ""}
+
+        {/* Time */}
+        <span
+          style={{
+            fontSize:     9,
+            fontFamily:   "monospace",
+            letterSpacing: "0.04em",
+            color:        isOwn ? "rgba(245,166,35,0.55)" : "rgba(var(--text-rgb), 0.35)",
+            lineHeight:   1,
+          }}
+        >
+          {displayTime}
         </span>
       </div>
-      <audio controls src={att.url} style={{ width: "100%", height: 32, accentColor: "#F5A623" }} />
     </div>
   );
 }
@@ -146,7 +273,7 @@ function FileAttachment({ att, isOwn }: { att: Attachment; isOwn: boolean }) {
 function renderAttachment(att: Attachment, i: number, isOwn: boolean) {
   const mime = att.fileType ?? "";
   if (mime.startsWith("image/")) return <ImageAttachment key={i} att={att} />;
-  if (mime.startsWith("audio/")) return <AudioAttachment key={i} att={att} />;
+  if (mime.startsWith("audio/")) return <AudioAttachment key={i} att={att} isOwn={isOwn} />;
   return <FileAttachment key={i} att={att} isOwn={isOwn} />;
 }
 
@@ -160,7 +287,7 @@ export default function MessageBubble({ message, isOwn, showTail, animate = fals
   const imageOnly      = hasAttachments && !hasText && attachments.every((a) => a.fileType?.startsWith("image/"));
 
   const base: React.CSSProperties = {
-    maxWidth:     "72%",
+    maxWidth:     "clamp(240px, 72%, 560px)",
     padding:      imageOnly ? 4 : "9px 13px",
     borderRadius: 16,
     fontSize:     14,

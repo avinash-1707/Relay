@@ -163,12 +163,13 @@ export default function ChatInput({ onSend, participantName, onTyping, onStopTyp
   return (
     <div
       style={{
-        padding:        "12px 20px 16px",
+        padding:        "12px 16px 16px",
         borderTop:      "1px solid rgba(245,166,35,0.08)",
         background:     "rgba(var(--space-rgb), 0.92)",
         backdropFilter: "blur(22px)",
         flexShrink:     0,
         position:       "relative",
+        boxSizing:      "border-box",
       }}
     >
       {/* Top iridescent line */}
@@ -200,9 +201,10 @@ export default function ChatInput({ onSend, participantName, onTyping, onStopTyp
             style={{
               position:    "absolute",
               bottom:      "100%",
-              left:        20,
+              left:        0,
+              right:       0,
               marginBottom: 8,
-              width:       324,
+              width:       "min(324px, calc(100vw - 24px))",
               borderRadius: 14,
               background:  "var(--panel)",
               border:      "1px solid rgba(245,166,35,0.14)",

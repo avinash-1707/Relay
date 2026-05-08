@@ -11,6 +11,7 @@ interface Props {
   currentUserId: string;
   currentUserDisplayName: string;
   onSend: (text: string, messageType?: string, attachments?: ServerAttachment[]) => void;
+  onBack?: () => void;
 }
 
 const WAVEFORM_ANIMS = ["waveform-a", "waveform-b", "waveform-c", "waveform-d"] as const;
@@ -20,6 +21,7 @@ export default function ChatWindow({
   currentUserId,
   currentUserDisplayName,
   onSend,
+  onBack,
 }: Props) {
   const { typingUsers, notifyTyping, stopTyping } = useTyping(
     conversation.id,
@@ -37,7 +39,7 @@ export default function ChatWindow({
         flex:          1,
         display:       "flex",
         flexDirection: "column",
-        height:        "100vh",
+        height:        "100dvh",
         overflow:      "hidden",
         position:      "relative",
         background:    "var(--void)",
@@ -109,7 +111,7 @@ export default function ChatWindow({
           height:        "100%",
         }}
       >
-        <ChatHeader participant={conversation.participant} />
+        <ChatHeader participant={conversation.participant} onBack={onBack} />
 
         <MessageList
           messages={conversation.messages}

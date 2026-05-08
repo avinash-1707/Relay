@@ -13,6 +13,7 @@ interface Props {
   onSearch: (q: string) => void;
   onTabChange: (t: AppState["sidebarTab"]) => void;
   onLogout: () => void;
+  mobile?: boolean;
 }
 
 export default function Sidebar({
@@ -25,14 +26,15 @@ export default function Sidebar({
   onSearch,
   onTabChange,
   onLogout,
+  mobile,
 }: Props) {
   return (
     <div
       style={{
-        width:       320,
-        minWidth:    280,
-        maxWidth:    340,
-        height:      "100vh",
+        width:       mobile ? "100%" : 320,
+        minWidth:    mobile ? undefined : 280,
+        maxWidth:    mobile ? undefined : 340,
+        height:      "100dvh",
         display:     "flex",
         flexDirection: "column",
         background:  "var(--space)",

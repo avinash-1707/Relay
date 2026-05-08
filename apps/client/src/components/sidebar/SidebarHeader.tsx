@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import Avatar from "../shared/Avatar";
 import { ThemeToggle } from "../landing/ThemeToggle";
@@ -45,6 +46,7 @@ const TABS: { id: AppState["sidebarTab"]; label: string; icon: JSX.Element }[] =
 ];
 
 export default function SidebarHeader({ tab, onTabChange, currentUser, onLogout }: Props) {
+  const router = useRouter();
   const [menuOpen, setMenuOpen]     = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const menuRef   = useRef<HTMLDivElement>(null);
@@ -76,7 +78,9 @@ export default function SidebarHeader({ tab, onTabChange, currentUser, onLogout 
         >
           {/* Arcade logo mark */}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div
+            <button
+              onClick={() => router.push("/")}
+              title="Back to home"
               style={{
                 width:          34,
                 height:         34,
@@ -88,6 +92,18 @@ export default function SidebarHeader({ tab, onTabChange, currentUser, onLogout 
                 boxShadow:      "0 0 18px rgba(245,166,35,0.38), 0 0 4px rgba(245,166,35,0.7)",
                 animation:      "amber-flicker 9s ease-in-out infinite",
                 flexShrink:     0,
+                border:         "none",
+                cursor:         "pointer",
+                padding:        0,
+                transition:     "transform 0.15s, box-shadow 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.08)";
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 28px rgba(245,166,35,0.55), 0 0 6px rgba(245,166,35,0.8)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 18px rgba(245,166,35,0.38), 0 0 4px rgba(245,166,35,0.7)";
               }}
             >
               {/* Hexagon icon */}
@@ -104,7 +120,7 @@ export default function SidebarHeader({ tab, onTabChange, currentUser, onLogout 
                   fill="rgba(255,255,255,0.65)"
                 />
               </svg>
-            </div>
+            </button>
 
             <div>
               <div

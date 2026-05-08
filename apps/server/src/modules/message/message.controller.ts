@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import * as service from "./message.service.js";
 import { io } from "../../socket/index.js";
 import { SOCKET_EVENTS } from "@relay/shared";
+import Message from "./message.model.js";
 
 const param = (v: string | string[]): string =>
   Array.isArray(v) ? v[0] : v;
@@ -48,6 +49,23 @@ export const send = async (
       attachments,
     );
     io.to(conversationId).emit(SOCKET_EVENTS.MESSAGE_NEW, message);
+
+    // Mark delivered if recipient is already connected in the room
+    const roomSockets = await io.in(conversationId).fetchSockets();
+    const recipientOnline = roomSockets.some(
+      (s) => (s as any).userId !== (req as any).userId,
+    );
+    if (recipientOnline) {
+      await Message.findByIdAndUpdate(message._id, {
+        deliveryStatus: "delivered",
+      });
+      io.to(conversationId).emit(SOCKET_EVENTS.MESSAGE_STATUS, {
+        messageId: String(message._id),
+        conversationId,
+        deliveryStatus: "delivered",
+      });
+    }
+
     res.status(201).json(message);
   } catch (err) {
     next(err);

@@ -141,10 +141,15 @@ export function useChat() {
 
   const serverUserIdRef = useRef<string>("");
   const activeConvIdRef = useRef<string | null>(null);
+  const socketRef = useRef(socket);
 
   useEffect(() => {
     activeConvIdRef.current = state.activeConversationId;
   }, [state.activeConversationId]);
+
+  useEffect(() => {
+    socketRef.current = socket;
+  }, [socket]);
 
   useEffect(() => {
     if (!authReady) return;
@@ -190,6 +195,9 @@ export function useChat() {
         return { ...prev, [convId]: [...existing, clientMsg] };
       });
 
+      const isActiveConv = activeConvIdRef.current === convId;
+      const fromOther = msg.sender._id !== uid;
+
       setConversations((prev) =>
         prev.map((c) =>
           c.id === convId
@@ -197,14 +205,21 @@ export function useChat() {
                 ...c,
                 messages: [clientMsg],
                 unreadCount:
-                  msg.sender._id !== uid &&
-                  activeConvIdRef.current !== convId
+                  fromOther && !isActiveConv
                     ? c.unreadCount + 1
                     : c.unreadCount,
               }
             : c,
         ),
       );
+
+      // Emit read immediately if conversation is open and message is from someone else
+      if (isActiveConv && fromOther) {
+        socketRef.current?.emit(SOCKET_EVENTS.MESSAGE_READ, {
+          messageId: msg._id,
+          conversationId: convId,
+        });
+      }
     };
 
     const handleStatus = (event: RawStatusEvent) => {
@@ -250,13 +265,38 @@ export function useChat() {
     markConversationRead(id).catch(() => {});
 
     setLoadedMessages((prev) => {
-      if (prev[id]) return prev;
+      if (prev[id]) {
+        // Already loaded — emit reads for any unread messages from others
+        const uid = serverUserIdRef.current;
+        prev[id]
+          .filter((m) => m.senderId !== "me" && m.status !== "read")
+          .forEach((m) => {
+            socketRef.current?.emit(SOCKET_EVENTS.MESSAGE_READ, {
+              messageId: m.id,
+              conversationId: id,
+            });
+          });
+        return prev;
+      }
       getMessages(id)
         .then((page) => {
+          const uid = serverUserIdRef.current;
           const msgs = page.messages.map((m) =>
-            mapServerMessage(m, serverUserIdRef.current),
+            mapServerMessage(m, uid),
           );
           setLoadedMessages((p) => ({ ...p, [id]: msgs }));
+          // Emit read for unread messages from others
+          page.messages
+            .filter(
+              (m) =>
+                m.sender._id !== uid && m.deliveryStatus !== "read",
+            )
+            .forEach((m) => {
+              socketRef.current?.emit(SOCKET_EVENTS.MESSAGE_READ, {
+                messageId: m._id,
+                conversationId: id,
+              });
+            });
         })
         .catch((err) =>
           console.error("[useChat] load messages failed", err),

@@ -7,6 +7,60 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+const ACCESS_TOKEN_KEY = "relay_access_token";
+
+let isRefreshing = false;
+let refreshQueue: Array<(token: string) => void> = [];
+
+api.interceptors.response.use(
+  (res) => res,
+  async (error) => {
+    const original = error.config;
+    if (
+      error.response?.status !== 401 ||
+      original._retry ||
+      original.url?.includes("/auth/refresh")
+    ) {
+      return Promise.reject(error);
+    }
+
+    if (isRefreshing) {
+      return new Promise((resolve) => {
+        refreshQueue.push((token) => {
+          original.headers.Authorization = `Bearer ${token}`;
+          resolve(api(original));
+        });
+      });
+    }
+
+    original._retry = true;
+    isRefreshing = true;
+
+    try {
+      const { data } = await axios.post<{ accessToken: string }>(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/refresh`,
+        undefined,
+        { withCredentials: true },
+      );
+      const token = data.accessToken;
+      localStorage.setItem(ACCESS_TOKEN_KEY, token);
+      api.defaults.headers.common.Authorization = `Bearer ${token}`;
+      refreshQueue.forEach((cb) => cb(token));
+      refreshQueue = [];
+      original.headers.Authorization = `Bearer ${token}`;
+      return api(original);
+    } catch {
+      refreshQueue = [];
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      delete api.defaults.headers.common.Authorization;
+      window.location.href = "/login";
+      return Promise.reject(error);
+    } finally {
+      isRefreshing = false;
+    }
+  },
+);
+
 const AUTH_BASE = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth`;
 
 export interface SignupPayload {
