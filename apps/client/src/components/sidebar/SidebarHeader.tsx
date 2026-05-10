@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import Avatar from "../shared/Avatar";
 import { ThemeToggle } from "../landing/ThemeToggle";
+import NewConversationModal from "./NewConversationModal";
 import type { AppState, User } from "../../types";
 import { JSX } from "react/jsx-dev-runtime";
 
@@ -13,6 +14,7 @@ interface Props {
   onTabChange: (t: AppState["sidebarTab"]) => void;
   currentUser: User | null;
   onLogout: () => void;
+  onCompose: (email: string) => void | Promise<void>;
 }
 
 const TABS: { id: AppState["sidebarTab"]; label: string; icon: JSX.Element }[] = [
@@ -45,10 +47,11 @@ const TABS: { id: AppState["sidebarTab"]; label: string; icon: JSX.Element }[] =
   },
 ];
 
-export default function SidebarHeader({ tab, onTabChange, currentUser, onLogout }: Props) {
+export default function SidebarHeader({ tab, onTabChange, currentUser, onLogout, onCompose }: Props) {
   const router = useRouter();
-  const [menuOpen, setMenuOpen]     = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
+  const [menuOpen,     setMenuOpen]     = useState(false);
+  const [profileOpen,  setProfileOpen]  = useState(false);
+  const [composeOpen,  setComposeOpen]  = useState(false);
   const menuRef   = useRef<HTMLDivElement>(null);
   const avatarRef = useRef<HTMLButtonElement>(null);
 
@@ -153,7 +156,7 @@ export default function SidebarHeader({ tab, onTabChange, currentUser, onLogout 
 
           {/* Action buttons + avatar */}
           <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-            <IconBtn title="Compose">
+            <IconBtn title="Compose" onClick={() => setComposeOpen(true)}>
               <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
               </svg>
@@ -296,17 +299,28 @@ export default function SidebarHeader({ tab, onTabChange, currentUser, onLogout 
           <ProfileModal user={currentUser} onClose={() => setProfileOpen(false)} />
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {composeOpen && (
+          <NewConversationModal
+            onStart={onCompose}
+            onClose={() => setComposeOpen(false)}
+            currentUserEmail={currentUser?.email}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
 
 /* ─── Icon button ─────────────────────────────────────────────────────────── */
 
-function IconBtn({ children, title }: { children: React.ReactNode; title: string }) {
+function IconBtn({ children, title, onClick }: { children: React.ReactNode; title: string; onClick?: () => void }) {
   const [hov, setHov] = useState(false);
   return (
     <button
       title={title}
+      onClick={onClick}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{

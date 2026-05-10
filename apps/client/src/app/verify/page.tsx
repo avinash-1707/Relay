@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence, cubicBezier } from "motion/react";
 import { api, AuthApiError, verifyOtp } from "@/lib/api";
@@ -191,7 +191,7 @@ function SuccessScreen() {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export default function VerifyPage() {
+function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
@@ -450,5 +450,17 @@ export default function VerifyPage() {
         </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: "100vh", background: "var(--void)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 24, height: 24, border: "2px solid rgba(245,166,35,0.2)", borderTopColor: "#F5A623", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+      </div>
+    }>
+      <VerifyContent />
+    </Suspense>
   );
 }

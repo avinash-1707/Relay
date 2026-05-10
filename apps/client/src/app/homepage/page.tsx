@@ -79,6 +79,7 @@ export default function App() {
           onSearch={setSearchQuery}
           onTabChange={setSidebarTab}
           onLogout={handleLogout}
+          onCompose={startConversationByEmail}
           mobile={isMobile}
         />
       </div>

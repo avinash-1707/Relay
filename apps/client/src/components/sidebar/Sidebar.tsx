@@ -13,6 +13,7 @@ interface Props {
   onSearch: (q: string) => void;
   onTabChange: (t: AppState["sidebarTab"]) => void;
   onLogout: () => void;
+  onCompose: (email: string) => void | Promise<void>;
   mobile?: boolean;
 }
 
@@ -26,6 +27,7 @@ export default function Sidebar({
   onSearch,
   onTabChange,
   onLogout,
+  onCompose,
   mobile,
 }: Props) {
   return (
@@ -91,6 +93,7 @@ export default function Sidebar({
           onTabChange={onTabChange}
           currentUser={currentUser}
           onLogout={onLogout}
+          onCompose={onCompose}
         />
         <SearchBar value={searchQuery} onChange={onSearch} />
         <ConversationList
