@@ -98,9 +98,11 @@ export const signup = async (
 
   if (existing) {
     if (existing.authProvider !== "local") {
-      // Existing OAuth account — send OTP so they can log in
+      // Existing OAuth account — save new password + send OTP so they can log in with email/password too
+      const hashed = await bcrypt.hash(password, SALT_ROUNDS);
       const code = generateOtp();
       await User.findByIdAndUpdate(existing._id, {
+        password: hashed,
         verificationCode: code,
         verificationCodeExpiresAt: new Date(
           Date.now() + OTP_TTL_MINUTES * 60 * 1000,
@@ -196,10 +198,10 @@ export const login = async (
   const user = await User.findOne({ email }).select("+password");
   if (!user) throw new Error("Invalid credentials");
 
-  if (user.authProvider !== "local")
-    throw new Error("Use Google to sign in to this account");
+  if (!user.password)
+    throw new Error("This account uses Google sign-in. Please sign in with Google.");
 
-  const ok = await bcrypt.compare(password, user.password || "");
+  const ok = await bcrypt.compare(password, user.password);
   if (!ok) throw new Error("Invalid credentials");
 
   if (!user.isEmailVerified) throw new Error("Email not verified");
