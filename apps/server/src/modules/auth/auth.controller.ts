@@ -24,22 +24,30 @@ export const signup = async (
 ) => {
   try {
     const { email, password, displayName } = req.body;
-    const user = await service.signup(email, password, displayName);
-    res.status(201).json({ message: "User created. Verify your email." });
+    const result = await service.signup(email, password, displayName);
+    if (result.requiresOtp) {
+      return res.status(200).json({
+        message: "Verification code sent to your email.",
+        existing: true,
+      });
+    }
+    res.status(201).json({
+      message: "Account created. Check your email for the verification code.",
+    });
   } catch (err) {
     next(err);
   }
 };
 
-export const verifyEmail = async (
+export const verifyOtp = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const token = String(req.query.token || "");
-    await service.verifyEmail(token);
-    res.json({ message: "Email verified" });
+    const { email, code } = req.body;
+    const { accessToken } = await service.verifyOtp(email, code, req, res);
+    res.json({ accessToken });
   } catch (err) {
     next(err);
   }
@@ -98,7 +106,6 @@ export const session = async (
   }
 };
 
-// Called after Passport GoogleStrategy
 export const googleCallback = async (
   req: Request,
   res: Response,
@@ -125,7 +132,7 @@ export const googleCallback = async (
 
 export default {
   signup,
-  verifyEmail,
+  verifyOtp,
   login,
   refresh,
   logout,

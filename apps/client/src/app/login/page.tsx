@@ -306,7 +306,7 @@ function LoginForm({ onSuccess, onError, onGoogleLoading, googleLoading }: {
 // ── Register Form ─────────────────────────────────────────────────────────────
 
 function RegisterForm({ onSuccess, onError, onGoogleLoading, googleLoading }: {
-  onSuccess: () => void;
+  onSuccess: (email: string, isExisting?: boolean) => void;
   onError: (message: string) => void;
   onGoogleLoading: (v: boolean) => void;
   googleLoading: boolean;
@@ -326,8 +326,8 @@ function RegisterForm({ onSuccess, onError, onGoogleLoading, googleLoading }: {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       onError("");
-      await signup({ email: data.email, password: data.password, displayName: data.name });
-      onSuccess();
+      const result = await signup({ email: data.email, password: data.password, displayName: data.name });
+      onSuccess(data.email, result.existing);
     } catch (error) {
       onError(getErrorMessage(error, "Unable to create account. Please try again."));
     }
@@ -678,10 +678,14 @@ export default function RelayAuth() {
     setTimeout(() => router.push("/homepage"), 900);
   };
 
-  const handleRegisterSuccess = () => {
+  const handleRegisterSuccess = (email: string, isExisting?: boolean) => {
     setAuthError("");
-    setSuccess(true);
-    setTimeout(() => switchMode("login"), 1000);
+    if (isExisting) {
+      router.push(`/verify?email=${encodeURIComponent(email)}`);
+    } else {
+      setSuccess(true);
+      setTimeout(() => router.push(`/verify?email=${encodeURIComponent(email)}`), 900);
+    }
   };
 
   return (

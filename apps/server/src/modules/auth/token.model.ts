@@ -11,7 +11,7 @@ export interface IDeviceInfo {
 
 export interface IToken extends Document {
   user: mongoose.Types.ObjectId;
-  type: "EMAIL_VERIFY" | "REFRESH" | "RESET_PASSWORD";
+  type: "REFRESH" | "RESET_PASSWORD";
   tokenHash: string;
   deviceInfo: IDeviceInfo;
   expiresAt: Date;
@@ -28,7 +28,7 @@ export interface ICreateTokenOptions {
   userAgent?: string | null;
   ip?: string | null;
   familyId?: string | null;
-  type?: "EMAIL_VERIFY" | "REFRESH" | "RESET_PASSWORD";
+  type?: "REFRESH" | "RESET_PASSWORD";
 }
 
 export interface ITokenModel extends Model<IToken> {
@@ -39,12 +39,12 @@ export interface ITokenModel extends Model<IToken> {
 
   verifyToken(
     rawToken: string,
-    type?: "EMAIL_VERIFY" | "REFRESH" | "RESET_PASSWORD",
+    type?: "REFRESH" | "RESET_PASSWORD",
   ): Promise<IToken>;
 
   revokeToken(
     rawToken: string,
-    type?: "EMAIL_VERIFY" | "REFRESH" | "RESET_PASSWORD",
+    type?: "REFRESH" | "RESET_PASSWORD",
   ): Promise<void>;
 
   revokeAllForUser(userId: mongoose.Types.ObjectId): Promise<void>;
@@ -77,7 +77,7 @@ const tokenSchema = new Schema<IToken, ITokenModel>(
     // token type determines intended use and TTL semantics
     type: {
       type: String,
-      enum: ["EMAIL_VERIFY", "REFRESH", "RESET_PASSWORD"],
+      enum: ["REFRESH", "RESET_PASSWORD"],
       required: true,
       index: true,
     },
@@ -174,7 +174,7 @@ tokenSchema.statics.createToken = async function (
 
 tokenSchema.statics.verifyToken = async function (
   rawToken: string,
-  type?: "EMAIL_VERIFY" | "REFRESH" | "RESET_PASSWORD",
+  type?: "REFRESH" | "RESET_PASSWORD",
 ): Promise<IToken> {
   const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
   const query: any = { tokenHash };
@@ -203,7 +203,7 @@ tokenSchema.statics.verifyToken = async function (
 
 tokenSchema.statics.revokeToken = async function (
   rawToken: string,
-  type?: "EMAIL_VERIFY" | "REFRESH" | "RESET_PASSWORD",
+  type?: "REFRESH" | "RESET_PASSWORD",
 ): Promise<void> {
   const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
   const query: any = { tokenHash };

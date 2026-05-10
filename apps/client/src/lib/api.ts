@@ -71,6 +71,7 @@ export interface SignupPayload {
 
 export interface SignupResponse {
   message: string;
+  existing?: boolean;
 }
 
 export interface LoginPayload {
@@ -82,8 +83,13 @@ export interface LoginResponse {
   accessToken: string;
 }
 
-export interface VerifyEmailResponse {
-  message: string;
+export interface VerifyOtpPayload {
+  email: string;
+  code: string;
+}
+
+export interface VerifyOtpResponse {
+  accessToken: string;
 }
 
 
@@ -210,19 +216,19 @@ export const login = async (payload: LoginPayload): Promise<LoginResponse> => {
   );
 };
 
-export const verifyEmail = async (
-  token: string,
-): Promise<VerifyEmailResponse> => {
-  if (!token?.trim()) {
+export const verifyOtp = async (
+  payload: VerifyOtpPayload,
+): Promise<VerifyOtpResponse> => {
+  if (!payload.email?.trim() || !payload.code?.trim()) {
     throw new AuthApiError(
-      "Verification token is required.",
+      "Email and verification code are required.",
       "VALIDATION_ERROR",
     );
   }
-  return getAuth<VerifyEmailResponse>(
-    "/verify-email",
-    { token },
-    "Email verification failed. The link may be invalid or expired.",
+  return postAuth<VerifyOtpResponse>(
+    "/verify-otp",
+    payload,
+    "Verification failed. Please check your code and try again.",
   );
 };
 

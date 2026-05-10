@@ -14,7 +14,8 @@ export interface IUser extends Document {
   lastSeen: Date | null;
   socketId: string | null;
   isEmailVerified: boolean;
-  emailVerificationToken: string | null;
+  verificationCode: string | null;
+  verificationCodeExpiresAt: Date | null;
   passwordResetToken: string | null;
   passwordResetExpiresAt: Date | null;
   isDeactivated: boolean;
@@ -114,8 +115,14 @@ const userSchema = new Schema<IUser, IUserModel>(
       default: false,
     },
 
-    emailVerificationToken: {
+    verificationCode: {
       type: String,
+      default: null,
+      select: false,
+    },
+
+    verificationCodeExpiresAt: {
+      type: Date,
       default: null,
       select: false,
     },
