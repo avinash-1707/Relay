@@ -300,7 +300,7 @@ function DualChatDemo() {
   }));
 
   return (
-    <div ref={ref} style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+    <div ref={ref} className="dual-chat-demo">
       <MiniWindow
         title="You"
         isMe
@@ -310,18 +310,7 @@ function DualChatDemo() {
       />
 
       {/* Signal pulse between windows */}
-      <div
-        style={{
-          display:        "flex",
-          flexDirection:  "column",
-          alignItems:     "center",
-          justifyContent: "center",
-          gap:            8,
-          paddingTop:     56,
-          flexShrink:     0,
-          width:          48,
-        }}
-      >
+      <div className="dual-chat-signal">
         <div
           style={{
             width:        8,
@@ -388,14 +377,7 @@ export default function RealTime() {
   return (
     <section id="how-it-works" style={{ padding: "100px 24px" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap:                 "clamp(40px, 6vw, 80px)",
-            alignItems:          "center",
-          }}
-        >
+        <div className="realtime-grid">
           {/* Left: text */}
           <div ref={ref}>
             <motion.p

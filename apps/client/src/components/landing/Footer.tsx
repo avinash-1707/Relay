@@ -20,14 +20,7 @@ export default function Footer() {
       />
 
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "64px 24px 40px" }}>
-        <div
-          style={{
-            display:             "grid",
-            gridTemplateColumns: "1.4fr 1fr 1fr 1fr",
-            gap:                 "clamp(24px, 4vw, 48px)",
-            marginBottom:        56,
-          }}
-        >
+        <div className="footer-links-grid">
           {/* Brand column */}
           <div>
             {/* Logo */}

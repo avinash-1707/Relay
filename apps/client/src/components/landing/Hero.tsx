@@ -392,19 +392,7 @@ export default function Hero() {
       />
 
       {/* ── Content ──────────────────────────────────────────────────── */}
-      <div
-        style={{
-          maxWidth:            1200,
-          margin:              "0 auto",
-          padding:             "0 32px",
-          display:             "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap:                 "clamp(40px, 6vw, 80px)",
-          alignItems:          "center",
-          width:               "100%",
-          position:            "relative",
-        }}
-      >
+      <div className="hero-grid">
         {/* Left: text */}
         <div>
           {/* Badge */}
@@ -601,6 +589,7 @@ export default function Hero() {
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7, delay: 0.18, ease }}
+          className="hero-mockup"
           style={{
             display:        "flex",
             justifyContent: "center",

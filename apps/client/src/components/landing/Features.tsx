@@ -72,21 +72,18 @@ function FeatureStrip({
       transition={{ duration: 0.5, delay: index * 0.1, ease }}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
+      className="feature-strip-grid"
       style={{
-        display:         "grid",
-        gridTemplateColumns: "72px 1fr 72px",
-        alignItems:      "center",
-        gap:             32,
-        padding:         "28px 0",
-        borderTop:       "1px solid rgba(245,166,35,0.07)",
-        background:      hov ? `rgba(${feature.color === "#F5A623" ? "245,166,35" : feature.color === "#22C55E" ? "34,197,94" : feature.color === "#2B7FFF" ? "43,127,255" : "139,92,246"},0.025)` : "transparent",
-        borderRadius:    8,
-        transition:      "background 0.2s",
-        cursor:          "default",
-        paddingLeft:     12,
-        paddingRight:    12,
-        marginLeft:      -12,
-        marginRight:     -12,
+        padding:      "28px 0",
+        paddingLeft:  12,
+        paddingRight: 12,
+        marginLeft:   -12,
+        marginRight:  -12,
+        borderTop:    "1px solid rgba(245,166,35,0.07)",
+        background:   hov ? `rgba(${feature.color === "#F5A623" ? "245,166,35" : feature.color === "#22C55E" ? "34,197,94" : feature.color === "#2B7FFF" ? "43,127,255" : "139,92,246"},0.025)` : "transparent",
+        borderRadius: 8,
+        transition:   "background 0.2s",
+        cursor:       "default",
       }}
     >
       {/* Number */}
@@ -132,6 +129,7 @@ function FeatureStrip({
 
       {/* Icon */}
       <div
+        className="feature-strip-icon"
         style={{
           width:          52,
           height:         52,
@@ -140,12 +138,8 @@ function FeatureStrip({
             ? `rgba(${feature.color === "#F5A623" ? "245,166,35" : feature.color === "#22C55E" ? "34,197,94" : feature.color === "#2B7FFF" ? "43,127,255" : "139,92,246"},0.12)`
             : "rgba(var(--border-rgb), 0.04)",
           border:         `1px solid ${hov ? `${feature.color}28` : "rgba(var(--border-rgb), 0.07)"}`,
-          display:        "flex",
-          alignItems:     "center",
-          justifyContent: "center",
           color:          hov ? feature.color : "rgba(var(--text-rgb), 0.3)",
           transition:     "all 0.22s",
-          justifySelf:    "end",
         }}
       >
         {feature.icon}

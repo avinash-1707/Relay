@@ -137,24 +137,25 @@ export default function Navbar() {
         </Link>
 
         {/* Anchor nav pills */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 0 }}>
+        <nav className="landing-nav-links">
           {NAV_LINKS.map((item) => (
             <NavPill key={item.label} label={item.label} href={item.href} />
           ))}
         </nav>
 
         {/* Divider */}
-        <div style={{ width: 1, height: 18, background: "rgba(var(--border-rgb), 0.07)", margin: "0 6px", flexShrink: 0 }} />
+        <div className="landing-nav-divider" style={{ width: 1, height: 18, background: "rgba(var(--border-rgb), 0.07)", margin: "0 6px", flexShrink: 0 }} />
 
         {/* Theme toggle */}
         <ThemeToggle />
 
         {/* Divider */}
-        <div style={{ width: 1, height: 18, background: "rgba(var(--border-rgb), 0.07)", margin: "0 6px", flexShrink: 0 }} />
+        <div className="landing-nav-divider" style={{ width: 1, height: 18, background: "rgba(var(--border-rgb), 0.07)", margin: "0 6px", flexShrink: 0 }} />
 
         {/* Sign in */}
         <Link
           href="/login"
+          className="landing-signin"
           style={{
             padding:        "6px 14px",
             borderRadius:   100,
