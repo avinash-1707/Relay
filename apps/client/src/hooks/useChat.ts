@@ -312,23 +312,43 @@ export function useChat() {
   ) => {
     const convId = activeConvIdRef.current;
     if (!convId || (!text.trim() && (!attachments || attachments.length === 0))) return;
+
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMsg: Message = {
+      id: tempId,
+      senderId: "me",
+      text: text.trim(),
+      timestamp: formatTime(new Date().toISOString()),
+      status: "sent",
+      messageType: messageType ?? "text",
+      attachments: [] as Attachment[],
+    };
+
+    setLoadedMessages((prev) => ({
+      ...prev,
+      [convId]: [...(prev[convId] ?? []), optimisticMsg],
+    }));
+    setConversations((prev) =>
+      prev.map((c) => c.id === convId ? { ...c, messages: [optimisticMsg] } : c),
+    );
+
     try {
       const msg = await sendMessageHttp(convId, text.trim(), messageType, attachments);
       const clientMsg = mapServerMessage(msg, serverUserIdRef.current);
 
-      setLoadedMessages((prev) => {
-        const existing = prev[convId] ?? [];
-        if (existing.some((m) => m.id === clientMsg.id)) return prev;
-        return { ...prev, [convId]: [...existing, clientMsg] };
-      });
-
+      setLoadedMessages((prev) => ({
+        ...prev,
+        [convId]: (prev[convId] ?? []).map((m) => m.id === tempId ? clientMsg : m),
+      }));
       setConversations((prev) =>
-        prev.map((c) =>
-          c.id === convId ? { ...c, messages: [clientMsg] } : c,
-        ),
+        prev.map((c) => c.id === convId ? { ...c, messages: [clientMsg] } : c),
       );
     } catch (err) {
       console.error("[useChat] sendMessage failed", err);
+      setLoadedMessages((prev) => ({
+        ...prev,
+        [convId]: (prev[convId] ?? []).filter((m) => m.id !== tempId),
+      }));
     }
   }, []);
 

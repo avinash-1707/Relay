@@ -39,7 +39,7 @@ export default function ChatWindow({
         flex:          1,
         display:       "flex",
         flexDirection: "column",
-        height:        "100dvh",
+        height:        "100%",
         overflow:      "hidden",
         position:      "relative",
         background:    "var(--void)",

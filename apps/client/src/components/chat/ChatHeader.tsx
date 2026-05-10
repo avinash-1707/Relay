@@ -26,6 +26,7 @@ const BUTTONS = [
 ] as const;
 
 export default function ChatHeader({ participant, onBack }: Props) {
+  const compact = !!onBack;
   const statusLabel =
     participant.status === "online"
       ? "LINK ACTIVE"
@@ -39,12 +40,14 @@ export default function ChatHeader({ participant, onBack }: Props) {
         display:        "flex",
         alignItems:     "center",
         justifyContent: "space-between",
-        padding:        "12px 20px",
+        padding:        compact ? "8px 12px" : "12px 20px",
         borderBottom:   "1px solid rgba(245,166,35,0.09)",
         background:     "rgba(var(--space-rgb), 0.92)",
         backdropFilter: "blur(22px)",
         flexShrink:     0,
-        position:       "relative",
+        position:       "sticky",
+        top:            0,
+        zIndex:         10,
         overflow:       "hidden",
       }}
     >
@@ -88,12 +91,12 @@ export default function ChatHeader({ participant, onBack }: Props) {
             </svg>
           </button>
         )}
-        <Avatar initials={participant.avatar} status={participant.status} size={40} />
+        <Avatar initials={participant.avatar} status={participant.status} size={compact ? 34 : 40} />
 
         <div>
           <div
             style={{
-              fontSize:      14,
+              fontSize:      compact ? 13 : 14,
               fontWeight:    700,
               color:         "var(--text)",
               letterSpacing: "-0.01em",
@@ -102,16 +105,16 @@ export default function ChatHeader({ participant, onBack }: Props) {
           >
             {participant.name}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
             {participant.status === "online" && (
               <span
                 style={{
-                  width:        5,
-                  height:       5,
+                  width:        4,
+                  height:       4,
                   borderRadius: "50%",
                   background:   "#00E676",
                   display:      "inline-block",
-                  boxShadow:    "0 0 7px rgba(0,230,118,0.8)",
+                  boxShadow:    "0 0 6px rgba(0,230,118,0.8)",
                 }}
               />
             )}
@@ -125,7 +128,7 @@ export default function ChatHeader({ participant, onBack }: Props) {
             >
               {statusLabel}
             </span>
-            {participant.region && (
+            {!compact && participant.region && (
               <span style={{ fontSize: 9, color: "rgba(var(--text-rgb), 0.17)", fontFamily: "monospace" }}>
                 · {participant.region}
               </span>

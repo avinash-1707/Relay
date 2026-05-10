@@ -661,6 +661,12 @@ export default function RelayAuth() {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        const token =
+          localStorage.getItem(ACCESS_TOKEN_KEY) ||
+          sessionStorage.getItem(ACCESS_TOKEN_KEY);
+        if (token) {
+          api.defaults.headers.common.Authorization = `Bearer ${token}`;
+        }
         const session = await getSessionStatus();
         if (session.active) router.push("/homepage");
       } catch {
